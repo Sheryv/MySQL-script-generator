@@ -1,0 +1,11 @@
++Users 
+Login, v 40,u 
+Email,v 255,u 
+Password,v 64 
+Registered, datetime 
+LastLogin, datetime 
+LastLoginInApp,datetime 
+LastSynchronization, datetime 
+SecurityLevel,tinyint 2 
+Permissions, int 
+Phone Number,v 20 
