@@ -2,6 +2,9 @@
 
 It is a simple C# WPF app which generate MySQL create table script based on simplified data. It generates also html code structure to describe this tables 
 
+## Download: [Latest release](https://github.com/Sheryv/MySQL-script-generator/releases/latest)
+
+
 ## Basic structure
 
 ### Table Name
@@ -12,7 +15,7 @@ Example:
 ```
 +Users
 ```
-Everything below will be considered as table names until next `+` sign.
+Everything below will be considered as field names until next `+` sign.
 
 ### Fields
 ```
