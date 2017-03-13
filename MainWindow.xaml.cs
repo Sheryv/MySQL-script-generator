@@ -20,7 +20,7 @@ namespace SQL_Generator_WPF
     public partial class MainWindow : Window
     {
 
-        private const string Version = "0.3";
+        private const string Version = "0.5";
         private const string TestTable =
             "+Users \r\nLogin, v 40,u \r\nEmail,v 255,u \r\nPassword,v 64 \r\nRegistered, datetime \r\nLastLogin, datetime \r\nLastLoginInApp,datetime \r\nLastSynchronization, datetime \r\nSecurityLevel,tinyint 2 \r\nPermissions, int \r\nPhone Number,v 20 ";
 
@@ -346,6 +346,19 @@ namespace SQL_Generator_WPF
         private void modeComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             upperCamelCase = (string) modeComboBox.SelectedItem == UpperCaseName;
+        }
+
+        private void Hyperlink_OnClick(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                Hyperlink h = (Hyperlink)sender;
+                System.Diagnostics.Process.Start(h.NavigateUri.ToString());
+            }
+            catch (Exception exception)
+            {
+                MessageBox.Show(exception.Message, "Error while openning url!");
+            }
         }
     }
 }

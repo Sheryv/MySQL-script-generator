@@ -4,8 +4,9 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SQL_Generator_WPF"
+        Icon="Res/icon.ico"
         mc:Ignorable="d"
-        Title="MainWindow" Height="384.8" Width="1017.267">
+        Title="MySQL Script Generator" Height="384.8" Width="1017.267">
     <Grid>
         <Button x:Name="openBtn" Content="Open" HorizontalAlignment="Left" Margin="10,38,0,0" VerticalAlignment="Top" Width="75" Height="23" Click="OpenBtn_Click"/>
         <TextBox x:Name="addressTxt" HorizontalAlignment="Left" Height="23" Margin="10,10,0,0" TextWrapping="Wrap" Text="Path.." VerticalAlignment="Top" Width="273"/>
@@ -23,7 +24,7 @@
             <StatusBar DockPanel.Dock="Bottom" FontSize="10" Margin="0">
                 <StatusBarItem Margin="10,0">
                     <TextBlock  Margin="0" VerticalAlignment="Top" >
-                    GitHub: <Hyperlink NavigateUri="https://github.com/Sheryv/MySQL-script-generator">https://github.com/Sheryv/MySQL-script-generator</Hyperlink>
+                    GitHub: <Hyperlink NavigateUri="https://github.com/Sheryv/MySQL-script-generator" Click="Hyperlink_OnClick">https://github.com/Sheryv/MySQL-script-generator</Hyperlink>
                     </TextBlock>
                 </StatusBarItem>
                 <StatusBarItem  HorizontalContentAlignment="Right" Margin="0,0,10,0">
