@@ -19,6 +19,8 @@ namespace SQL_Generator_WPF
 {
     public partial class MainWindow : Window
     {
+
+        private const string Version = "0.3";
         private const string TestTable =
             "+Users \r\nLogin, v 40,u \r\nEmail,v 255,u \r\nPassword,v 64 \r\nRegistered, datetime \r\nLastLogin, datetime \r\nLastLoginInApp,datetime \r\nLastSynchronization, datetime \r\nSecurityLevel,tinyint 2 \r\nPermissions, int \r\nPhone Number,v 20 ";
 
@@ -48,6 +50,7 @@ namespace SQL_Generator_WPF
             modeComboBox.Items.Add(UpperCaseName);
             modeComboBox.Items.Add(LowerCaseName);
             modeComboBox.SelectedIndex = 0;
+            versionTextBlock.Text = $"Version: {Version}";
         }
 
         private void OpenBtn_Click(object sender, RoutedEventArgs e)
