@@ -10,7 +10,7 @@ It is a simple C# WPF app which generate MySQL create table script based on simp
 ```
 Example:
 ```
-+Users,
++Users
 ```
 Everything below will be considered as table names until next `+` sign.
 
