@@ -18,20 +18,19 @@ Everything below will be considered as table names until next `+` sign.
 ```
 <field name>, <type and size>, <[n]>,<[u]> \n
 ```
-  * `<field name>` -> can contain space to separate words, will be formated according to chosen mode (now there are 2 modes: `UpperCamelCase`, `loweCamelCase`)
+ * `<field name>` -> can contain space to separate words, will be formated according to chosen mode (now there are 2 modes: `UpperCamelCase`, `loweCamelCase`)
   Example: `my new field`
   
 
-  * `<type and size>` -> proper mysql data type, few abbreviations are available: 
+ * `<type and size>` -> proper mysql data type, few abbreviations are available: 
     -- `v` for varchar
     Size is optional and can be provided in parentheses or after space
     Example: `int(2)`, `int 2`, `v 22`, `tinyint 3`, `datetime` 
-
  * `<[n]>` -> this parameter is optional and stand for `NULL`. If `n` is missing `NOT NULL` will be inserted for that field
-
  * `<[u]>` -> this parameter is optional and stand for `UNIQUE`. If `u` is present `UNIQUE` will be inserted for that field
 
 __Every field have to be defined in new line__
+
 __Id fields defined as primary key are added automatically to every table__
 
 Example fields
