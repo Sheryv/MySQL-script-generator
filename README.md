@@ -15,7 +15,7 @@ Example:
 ```
 +Users
 ```
-Everything below will be considered as table names until next `+` sign.
+Everything below will be considered as field names until next `+` sign.
 
 ### Fields
 ```
