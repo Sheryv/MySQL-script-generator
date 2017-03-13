@@ -12,13 +12,13 @@ Example:
 ```
 +Users,
 ```
-Everything below will be will be considered as table names until next `+` sign.
+Everything below will be considered as table names until next `+` sign.
 
 ### Fields
 ```
-<field name>, <type and size>, <[n]>,<[u]> 
+<field name>, <type and size>, <[n]>,<[u]> \n
 ```
-  * `<field name>` -> can be contain space to seperate word, will be formated according to chosen mode (now there are 2 modes: `UpperCamelCase`, `loweCamelCase`)
+  * `<field name>` -> can contain space to separate words, will be formated according to chosen mode (now there are 2 modes: `UpperCamelCase`, `loweCamelCase`)
   Example: `my new field`
   
 
@@ -31,7 +31,8 @@ Everything below will be will be considered as table names until next `+` sign.
 
  * `<[u]>` -> this parameter is optional and stand for `UNIQUE`. If `u` is present `UNIQUE` will be inserted for that field
 
-Every field have to be defined in new line
+__Every field have to be defined in new line__
+__Id fields defined as primary key are added automatically to every table__
 
 Example fields
 ```
@@ -42,8 +43,8 @@ Email,v 255,u
 
 ### Html table
 
-Application generate html table used to describe table in system specification.
-For now there Polish headers defined, to use other language constant strings in code need to be replaced.
+Application generate html table used to describe databese tables in system specification.
+For now there are only Polish headers defined, to use other language constant strings in code need to be replaced.
 
 ## Full Example 
 From
