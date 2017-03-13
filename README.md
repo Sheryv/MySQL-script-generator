@@ -2,7 +2,8 @@
 
 It is a simple C# WPF app which generate MySQL create table script based on simplified data. It generates also html code structure to describe this tables 
 
-### [Latest release](https://github.com/Sheryv/MySQL-script-generator/releases/latest)
+## Download: [Latest release](https://github.com/Sheryv/MySQL-script-generator/releases/latest)
+
 
 ## Basic structure
 
