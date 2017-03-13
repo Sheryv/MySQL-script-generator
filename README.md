@@ -6,7 +6,7 @@ It is a simple C# WPF app which generate MySQL create table script based on simp
 
 ### Table Name
 ```
-+<table name>,\n
++<table name>\n
 ```
 Example:
 ```
