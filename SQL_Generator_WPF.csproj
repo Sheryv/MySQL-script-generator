@@ -94,12 +94,19 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Coverter\GeneratorConfiguration.cs" />
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Models\Column.cs" />
+    <Compile Include="Models\Constraint.cs" />
+    <Compile Include="Models\DataType.cs" />
+    <Compile Include="Models\ForeignKey.cs" />
+    <Compile Include="Coverter\BasicGenerator.cs" />
+    <Compile Include="Models\Table.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>

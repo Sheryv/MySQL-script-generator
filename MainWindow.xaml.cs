@@ -14,57 +14,68 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using Microsoft.Win32;
+using SQL_Generator_WPF.Coverter;
 
 namespace SQL_Generator_WPF
 {
     public partial class MainWindow : Window
     {
 
-        private const string Version = "0.5";
+        private const string Version = "0.7";
         private const string TestTable =
-            "+Users \r\nLogin, v 40,u \r\nEmail,v 255,u \r\nPassword,v 64 \r\nRegistered, datetime \r\nLastLogin, datetime \r\nLastLoginInApp,datetime \r\nLastSynchronization, datetime \r\nSecurityLevel,tinyint 2 \r\nPermissions, int \r\nPhone Number,v 20 ";
+            "+Users \r\nLogin, v 40,u \r\nEmail,varchar(255),u \r\nPassword,v 64 \r\nRegistered, datetime, n \r\nLastLogin, decimal( 1 3) \r\nLastLoginInApp,datetime \r\nLastSynchronization, text \r\nSecurityLevel,tinyint 2 \r\nPermissions, int \r\nPhone Number,boolean ";
 
         private const string UpperCaseName = "UpperCamelCase";
         private const string LowerCaseName = "lowerCamelCase";
 
-        private const string TableColumnName = "Nazwa pola";
-        private const string TypeColumnName = "Typ pola";
-        private const string NecessityColumnName = "Czy pole jest wymagane";
-        private const string UniqueColumnName = "Czy wartość jest unikatowa";
-        private const string DescriptionColumnName = "Opis";
-        private const string AttrsLeftColumnName = "Pozostałe atrybuty";
-
-        private const string TableColumnGeneral = "Nazwa tabeli";
-        private const string TypeColumnGeneral = "Typ";
-
         private string fileDirectory;
-        private bool upperCamelCase = true;
-        private bool addIdWithPrimaryAuto = true;
-        private const string NoAnswer = "Nie";
-        private const string YesAnswer = "Tak";
 
 
         public MainWindow()
         {
             InitializeComponent();
             modeComboBox.Items.Add(UpperCaseName);
-            modeComboBox.Items.Add(LowerCaseName);
+            //modeComboBox.Items.Add(LowerCaseName);
             modeComboBox.SelectedIndex = 0;
             versionTextBlock.Text = $"Version: {Version}";
         }
+//
+//        protected string MakeTableHeader()
+//        {
+//            string header = "<thead>\r\n" +
+//                            "<tr>\r\n" +
+//                            $"    <th>{TableColumnName}</th>" +
+//                            $"<th>{TypeColumnName}</th>" +
+//                            $"<th>{NecessityColumnName}</th>" +
+//                            $"<th>{UniqueColumnName}</th>" +
+//                            $"<th>{AttrsLeftColumnName}</th>" +
+//                            $"<th>{DescriptionColumnName}</th>" +
+//                            "</tr>\r\n" +
+//                            "</thead>";
+//            return header;
+//        }
 
         private void OpenBtn_Click(object sender, RoutedEventArgs e)
         {
-            Microsoft.Win32.OpenFileDialog openPicker = new Microsoft.Win32.OpenFileDialog();
-            openPicker.DefaultExt = ".txt";
-            openPicker.Filter = "Text files|*.txt";
-            Nullable<bool> result = openPicker.ShowDialog();
-            if (result == true)
+            try
             {
-                addressTxt.Text = openPicker.FileName.ToString();
-                fileDirectory = openPicker.FileName.ToString();
+                OpenFileDialog openPicker = new OpenFileDialog();
+                openPicker.DefaultExt = ".txt";
+                openPicker.Filter = "Text files|*.txt";
+                Nullable<bool> result = openPicker.ShowDialog();
+                if (result == true)
+                {
+                    addressTxt.Text = openPicker.FileName.ToString();
+                    fileDirectory = openPicker.FileName.ToString();
+                }
+                inputTextBox.Text = File.ReadAllText(fileDirectory);
             }
-            inputTextBox.Text = File.ReadAllText(fileDirectory);
+            catch (Exception exception)
+            {
+                MessageBox.Show("Error", exception.Message);
+                throw;
+            }
         }
 
         private void generateBtn_Click(object sender, RoutedEventArgs e)
@@ -74,14 +85,26 @@ namespace SQL_Generator_WPF
             {
                 return;
             }
-            outPutTextBox.Text = Generate(txt);
+          
+                BasicGenerator generator = new BasicGenerator(BasicGenerator.DummyConfiguration);
+                outPutTextBox.Text= generator.Parse(txt).Generate().ToSql();
+                string h = generator.ToHtmlWithHeader();
+                WriteHtml(h);
+                tableOutTextBox.Text = h;
+             try
+            { }
+            catch (Exception exception)
+            {
+                MessageBox.Show(exception.Message, "Error while generating");
+            }
+            //outPutTextBox.Text = Generate(txt);
         }
 
 
-        private string Generate(string txt)
+     /*   private string Generate(string txt)
         {
             TextBox output = outPutTextBox;
-
+            List<string> tableList = new List<string>();
             StringBuilder builder = new StringBuilder();
             StringBuilder html = new StringBuilder();
             string[] tables = txt.Split('+');
@@ -95,11 +118,17 @@ namespace SQL_Generator_WPF
                 string[] lines = s.Split('\n');
                 string table = lines[0].Trim();
                 html.AppendLine($"<h2>{table}</h2>");
+                tableList.Add(table);
                 html.Append("<table class=\"table\">\n").Append(MakeTableHeader());
                 html.Append("\n<tbody>\n");
 
+                if (addDrops)
+                {
+                    builder.Append("DROP TABLE IF EXIST ").Append(table).AppendLine(";").AppendLine();
+                }
+
                 //tables
-                builder.Append("CREATE TABLE ").Append(table).Append(" (\n");
+                builder.Append("CREATE TABLE ").Append(table).AppendLine(" (");
                 if (addIdWithPrimaryAuto)
                 {
                     builder.Append("    ");
@@ -197,23 +226,10 @@ namespace SQL_Generator_WPF
                     string htmlUnique = NoAnswer;
                     if (attrs.Length > 2)
                     {
-                        int leftParamsIndex = 0;
-                        if (!attrs[2].Contains("n"))
-                        {
-                            builder.Append(" NOT NULL");
-                            necessity = YesAnswer;
-                            leftParamsIndex = 2;
-                        }
-                        else
-                        {
-                            leftParamsIndex = 3;
-                        }
-                        if (attrs.Length > 2)
-                        {
-                            string param = ProcessLeftParams(leftParamsIndex, attrs, out htmlAttrs, out htmlUnique);
+
+                            string param = ProcessLeftParams(2, attrs, out htmlAttrs, out htmlUnique, out necessity);
                             if (param.Length > 0)
                                 builder.Append(" ").Append(param);
-                        }
                     }
                     else
                     {
@@ -237,18 +253,34 @@ namespace SQL_Generator_WPF
                 html.AppendLine();
             }
             tableOutTextBox.Text = html.ToString();
-            ShowHtml(html);
+            WriteHtml(html.ToString());
             return builder.ToString();
         }
 
-        private void ShowHtml(StringBuilder html)
+        private string MakeFieldName(string rawColumn)
         {
-            string inside = html.ToString();
-            html = new StringBuilder();
-            html.AppendLine("<html lang=\"pl\"><head><meta charset=\"UTF-8\"><link rel=\"stylesheet\" href=\"https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css\" /></head><body>");
-            html.Append(inside);
-            html.Append("\n</body></html>");
-            File.WriteAllText("table.htm", html.ToString());
+            string[] parts = rawColumn.Trim().Split(' ');
+            string columnName = "";
+            for (var i = 0; i < parts.Length; i++)
+            {
+                string part = parts[i];
+                var letter = part[0].ToString();
+                if (upperCamelCase || i > 0)
+                {
+                    letter = letter.ToUpper();
+                }
+                else
+                {
+                    letter = letter.ToLower();
+                }
+                columnName += letter + part.Substring(1);
+            }
+            return columnName;
+        }
+*/
+        private void WriteHtml(String html)
+        {
+            File.WriteAllText("table.htm", html);
         }
 
         private void OpenFile(string path)
@@ -263,38 +295,36 @@ namespace SQL_Generator_WPF
             }
         }
 
-        private string MakeFieldName(string s)
+       
+/*
+        private string ProcessLeftParams(int searchStartIndex, string[] attrs, out string htmlAttrs, out string htmlUnique, out string necessity)
         {
-            string[] parts = s.Trim().Split(' ');
-            string field = "";
-            for (var i = 0; i < parts.Length; i++)
-            {
-                string part = parts[i];
-                var letter = part[0].ToString();
-                if (upperCamelCase || i > 0)
-                {
-                    letter = letter.ToUpper();
-                }
-                else
-                {
-                    letter = letter.ToLower();
-                }
-                field += letter + part.Substring(1);
-            }
-            return field;
-        }
-
-        private string ProcessLeftParams(int index, string[] attrs, out string htmlAttrs, out string htmlUnique)
-        {
-            string a = attrs[index].Trim();
-            htmlAttrs = "";
+            string output = "";
             htmlUnique = NoAnswer;
-            if (a.Contains("u"))
+            necessity = NoAnswer;
+            for (int i = searchStartIndex; i < attrs.Length; i++)
             {
-                htmlUnique = YesAnswer;
-                return "UNIQUE";
+                string attr = attrs[searchStartIndex].Trim();
+                if (!attr.StartsWith("n"))
+                {
+                    output+=" NOT NULL";
+                    necessity = YesAnswer;
+                }
+                else if (attr.StartsWith("u"))
+                {
+                    htmlUnique = YesAnswer;
+                    output+= " UNIQUE";
+                }
+                else if (attr.StartsWith("ref"))
+                {
+                    string key = attr.Substring(3);
+                    string[] names = key.Split('.');
+
+                }
             }
-            return "";
+
+            htmlAttrs = "";
+            return output;
         }
 
         private int GetTypeMaxSize(string attr, out string type)
@@ -315,21 +345,7 @@ namespace SQL_Generator_WPF
             }
         }
 
-        private string MakeTableHeader()
-        {
-            string header = "<thead>\r\n" +
-                            "<tr>\r\n" +
-                            $"    <th>{TableColumnName}</th>" +
-                            $"<th>{TypeColumnName}</th>" +
-                            $"<th>{NecessityColumnName}</th>" +
-                            $"<th>{UniqueColumnName}</th>" +
-                            $"<th>{AttrsLeftColumnName}</th>" +
-                            $"<th>{DescriptionColumnName}</th>" +
-                            "</tr>\r\n" +
-                            "</thead>";
-            return header;
-        }
-
+      */
         private void exampleButton_Click(object sender, RoutedEventArgs e)
         {
             inputTextBox.Text = TestTable;
@@ -345,7 +361,7 @@ namespace SQL_Generator_WPF
 
         private void modeComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            upperCamelCase = (string) modeComboBox.SelectedItem == UpperCaseName;
+            BasicGenerator.DummyConfiguration.UpperCamelCase = (string) modeComboBox.SelectedItem == UpperCaseName;
         }
 
         private void Hyperlink_OnClick(object sender, RoutedEventArgs e)
@@ -358,6 +374,37 @@ namespace SQL_Generator_WPF
             catch (Exception exception)
             {
                 MessageBox.Show(exception.Message, "Error while openning url!");
+            }
+        }
+
+        private void AddDropsChk_Checked(object sender, RoutedEventArgs e)
+        {
+            CheckBox check = (CheckBox) sender;
+            BasicGenerator.DummyConfiguration.AddDrops =  (check.IsChecked != null && check.IsChecked != false);
+        }
+
+        private void SetDefaultUnsigned_Checked(object sender, RoutedEventArgs e)
+        {
+            CheckBox check = (CheckBox)sender;
+            BasicGenerator.DummyConfiguration.SetIntUnsigned = (check.IsChecked != null && check.IsChecked != false);
+        }
+
+        private void QuotesChk_OnChecked(object sender, RoutedEventArgs e)
+        {
+            CheckBox check = (CheckBox)sender;
+            BasicGenerator.DummyConfiguration.AddQuotas = (check.IsChecked != null && check.IsChecked != false);
+        }
+
+        private void ReadBtn_OnClick(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                inputTextBox.Text = File.ReadAllText(addressTxt.Text);
+            }
+            catch (Exception exception)
+            {
+                
+                throw;
             }
         }
     }
