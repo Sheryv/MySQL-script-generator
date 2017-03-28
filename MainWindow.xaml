@@ -10,7 +10,7 @@
     <Grid>
         <Button x:Name="openBtn" Content="Open" HorizontalAlignment="Left" Margin="10,38,0,0" VerticalAlignment="Top" Width="75" Height="23" Click="OpenBtn_Click"/>
         <TextBox x:Name="addressTxt" HorizontalAlignment="Left" Height="23" Margin="10,10,0,0" TextWrapping="Wrap" Text="D:\dane.txt" VerticalAlignment="Top" Width="273"/>
-        <TextBox x:Name="inputTextBox" Margin="10,85,0,25.2" TextWrapping="Wrap" AcceptsReturn="True" HorizontalAlignment="Left" Width="249" Text="+PublicKeys  &#xD;&#xA;Owner,int,u&#xD;&#xA;CreateDate,datetime  &#xD;&#xA;DisableDate,datetime,n&#xD;&#xA;&#xD;&#xA;+Messages  &#xD;&#xA;Send date,datetime  &#xD;&#xA;Receive date,datetime,n&#xD;&#xA;Received flag, boolean  &#xD;&#xA;Conversation,v 40 &#xD;&#xA;Content, text  &#xD;&#xA;Security, varchar( 100 ), n &#xD;&#xA;Receiver PublicKey,int,ref PublicKeys.Id  &#xD;&#xA;Sender PublicKey,int,ref PublicKeys.Id  &#xD;&#xA;Visible, tinyint(1)&#xD;&#xA;Price, decimal( 5 2 )  "/>
+        <TextBox x:Name="inputTextBox" Margin="10,85,0,25.2" TextWrapping="Wrap" AcceptsReturn="True" HorizontalAlignment="Left" Width="249" Text="+Users &#xD;&#xA;Login, v 40,u &#xD;&#xA;Email,varchar(255),u &#xD;&#xA;Password,v 64 &#xD;&#xA;Registered, datetime, n &#xD;&#xA;LastLogin, decimal( 1 3) &#xD;&#xA;LastLoginInApp,datetime &#xD;&#xA;LastSynchronization, text &#xD;&#xA;SecurityLevel,tinyint 2 &#xD;&#xA;Permissions, int &#xD;&#xA;Phone Number,boolean &#xD;&#xA;&#xD;&#xA;&#xD;&#xA;+Roles&#xD;&#xA;Name, v 128&#xD;&#xA;Desc, longtext,n&#xD;&#xA;&#xD;&#xA;+UsersRoles, noid&#xD;&#xA;UserId, int, ref Users.Id, pk&#xD;&#xA;RoleId, int, ref Roles.Id, pk&#xD;&#xA;&#xD;&#xA;"/>
         <TextBox x:Name="outPutTextBox" Margin="264,85,0,25.2" TextWrapping="Wrap" AcceptsReturn="True" HorizontalAlignment="Left" Width="497" FontFamily="Consolas"/>
         <Button x:Name="exampleBtn" Content="Example" HorizontalAlignment="Left" Margin="199,38,0,0" VerticalAlignment="Top" Width="84" Height="23" Click="exampleButton_Click"/>
         <Button x:Name="button1" Content="Open in browser" HorizontalAlignment="Left" Margin="490,11,0,0" VerticalAlignment="Top" Width="113" Height="23" Click="button1_Click"/>
@@ -33,7 +33,7 @@
             </StatusBar>
         </DockPanel>
         <CheckBox x:Name="addDropsChk" Content="Add DROP statements" HorizontalAlignment="Left" Margin="618,10,0,0" VerticalAlignment="Top" Checked="AddDropsChk_Checked"/>
-        <CheckBox x:Name="setDefaultUnsigned" IsChecked="True" Content="Set unsigned for integers if not specified" HorizontalAlignment="Left" Margin="618,26,0,0" VerticalAlignment="Top" Checked="SetDefaultUnsigned_Checked"/>
+        <CheckBox x:Name="setDefaultUnsigned"  Content="Set unsigned for integers if not specified" HorizontalAlignment="Left" Margin="618,26,0,0" VerticalAlignment="Top" Checked="SetDefaultUnsigned_Checked"/>
         <CheckBox x:Name="quotesChk" Content="Add quote's" HorizontalAlignment="Left" Margin="618,42,0,0" VerticalAlignment="Top" Checked="QuotesChk_OnChecked"/>
         <Label x:Name="label1" Content="Input" HorizontalAlignment="Left" Margin="10,61,0,0" VerticalAlignment="Top" RenderTransformOrigin="-1.177,-0.156" Height="30"/>
         <Label x:Name="label2" Content="SQL Output" HorizontalAlignment="Left" Margin="264,61,0,0" VerticalAlignment="Top" RenderTransformOrigin="-1.177,-0.156" Height="30"/>

@@ -33,7 +33,7 @@ namespace SQL_Generator_WPF.Coverter
             AddDrops = false;
             AddIdWithPrimaryAuto = true;
             UpperCamelCase = true;
-            SetIntUnsigned = true;
+            SetIntUnsigned = false;
         }
     }
 }

@@ -88,7 +88,8 @@ namespace SQL_Generator_WPF.Models
     {
         NotNull,
         Unique,
-        References
+        References,
+        PrimaryKey
     }
 
 }

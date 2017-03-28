@@ -72,8 +72,10 @@ namespace SQL_Generator_WPF.Models
             list.Add(new DataTypePattern(EnumDataTypes.Int, gen.TypeInt, false));
             list.Add(new DataTypePattern(EnumDataTypes.Varchar, gen.TypeVarchar, true));
             list.Add(new DataTypePattern(EnumDataTypes.Char, gen.TypeChar, true));
+            list.Add(new DataTypePattern(EnumDataTypes.LongText, gen.TypeLongText, false));
             list.Add(new DataTypePattern(EnumDataTypes.Text, gen.TypeText, false));
             list.Add(new DataTypePattern(EnumDataTypes.DateTime, gen.TypeDateTime, false));
+            list.Add(new DataTypePattern(EnumDataTypes.Bit, gen.TypeBit, false));
             list.Add(new DataTypePattern(EnumDataTypes.TimeStamp, gen.TypeTimeStamp, false));
             list.Add(new DataTypePattern(EnumDataTypes.Date, gen.TypeDate, false));
             list.Add(new DataTypePattern(EnumDataTypes.Decimal, gen.TypeDecimal, true){HasAddistinalSize = true});
@@ -91,11 +93,13 @@ namespace SQL_Generator_WPF.Models
         Varchar,
         Char,
         Text,
+        LongText,
         Decimal,
         Blob,
         DateTime,
         Date,
         TimeStamp,
-        Boolean
+        Boolean,
+        Bit
     }
 }

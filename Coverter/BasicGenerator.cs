@@ -16,10 +16,12 @@ namespace SQL_Generator_WPF.Coverter
         public readonly string TypeVarchar = "VARCHAR";
         public readonly string TypeChar = "CHAR";
         public readonly string TypeText = "TEXT";
+        public readonly string TypeLongText = "LONGTEXT";
         public readonly string TypeDateTime = "DATETIME";
         public readonly string TypeDate = "DATE";
         public readonly string TypeTimeStamp = "TIMESTAMP";
         public readonly string TypeBoolean = "BOOLEAN";
+        public readonly string TypeBit = "BIT";
         public readonly string TypeDecimal = "DECIMAL";
         public readonly int DefaultIntegerSize = 11;
 
@@ -28,6 +30,7 @@ namespace SQL_Generator_WPF.Coverter
         public readonly AttributePattern AttributeNotNull;
         public readonly AttributePattern AttributeUnique;
         public readonly AttributePattern AttributeReference;
+        public readonly AttributePattern AttributePrimary;
         public static BasicGenerator Instance;
         public List<Table> Tables { get; private set; }
         public List<DataTypePattern> DataTypePatterns { get; }
@@ -87,6 +90,7 @@ namespace SQL_Generator_WPF.Coverter
             AttributeNotNull = new AttributePattern(EnumAtrributes.NotNull, NotNull, "n", true);
             AttributeUnique = new AttributePattern(EnumAtrributes.Unique, Unique, "u");
             AttributeReference = new AttributePattern(EnumAtrributes.References, References, "ref");
+            AttributePrimary = new AttributePattern(EnumAtrributes.PrimaryKey, Primary, "pk");
         }
 
         protected string MakeColumnName(string rawColumn)
@@ -172,21 +176,28 @@ namespace SQL_Generator_WPF.Coverter
 
         public BasicGenerator Parse(string encodedString)
         {
+           
             Tables = new List<Table>();
             string[] tables = encodedString.Split('+');
             foreach (string tbl in tables)
             {
+                bool addMultiPrimary = false;
                 string s = tbl.Trim();
                 if (s.Length <= 3)
                 {
                     continue;
                 }
-                int columnsIndex = 0;
+                int columnsIndex = 1;
                 string[] lines = s.Split('\n');
-                string tableName = lines[0].Trim();
+                string[] tableStringNameAttrs = lines[0].Split(',');
+                string tableName = tableStringNameAttrs[0].Trim();
+                if (tableStringNameAttrs.Length > 1 && tableStringNameAttrs[1].Contains("noid"))
+                {
+                    addMultiPrimary = true;
+                }
                 Table table = new Table(tableName);
                 Column column = null;
-                if (Config.AddIdWithPrimaryAuto)
+                if (!addMultiPrimary && Config.AddIdWithPrimaryAuto)
                 {
                     string col = "Id";
                     if (!Config.UpperCamelCase)
@@ -199,7 +210,7 @@ namespace SQL_Generator_WPF.Coverter
                     }
                     column = new Column(col);
                     column.SetPrimaryAutoIncrement();
-                    columnsIndex++;
+                    //columnsIndex++;
                     table.AddColumn(column);
                 }
                 for (; columnsIndex < lines.Length; columnsIndex++)
@@ -253,6 +264,10 @@ namespace SQL_Generator_WPF.Coverter
                             {
                                 column.UniqueAttribute = AttributeUnique;
                             }
+                            else if (param.StartsWith(AttributePrimary.SearchString))
+                            {
+                                column.IsPrimary = true;
+                            }
                             else if (param.StartsWith(AttributeReference.SearchString))
                             {
                                 string refer = param.Substring(param.IndexOf(' '));
@@ -284,6 +299,7 @@ namespace SQL_Generator_WPF.Coverter
 
             foreach (Table table in Tables)
             {
+                List<Column> primaryCols = new List<Column>();
                 htmlBuilder.AppendLine($"<h2>{table.Name}</h2>")
                     .AppendLine("<table class=\"table\">")
                     .Append(MakeTableHeader())
@@ -310,15 +326,24 @@ namespace SQL_Generator_WPF.Coverter
                     sqlBuilder.Append("    ").Append(column.Name).Append(" ");
                     if (column.IsPrimary)
                     {
+                        primaryCols.Add(column);
                         htmlBuilder.AppendLine(
                             $"<tr>\n    <td>{column.Name}</td><td>Całkowity</td><td>Tak</td><td>Tak</td><td>Klucz podstawowy, automatyczna inkrementacja</td><td>Wewnętrzny identyfikator</td></tr>");
 
-                        sqlBuilder.Append("INT ");
+                        sqlBuilder.Append("INT");
                         if (Config.SetIntUnsigned)
                         {
-                            sqlBuilder.Append(Unsigned).Append(" ");
+                            sqlBuilder.Append(" ").Append(Unsigned);
                         }
-                        sqlBuilder.AppendLine("NOT NULL PRIMARY KEY AUTO_INCREMENT,");
+                        if (column.IsAutoIncrement)
+                        {
+                            sqlBuilder.Append(" ").Append("AUTO_INCREMENT");
+                        }
+                        if (column.NotNullAttribute != null)
+                        {
+                            sqlBuilder.Append(" ").Append(column.NotNullAttribute.PrintName);
+                        }
+                        sqlBuilder.AppendLine(",");
                     }
                     else
                     {
@@ -357,11 +382,12 @@ namespace SQL_Generator_WPF.Coverter
                         htmlBuilder.AppendLine("    <td></td>");
                         htmlBuilder.AppendLine("    <td></td>");
                         htmlBuilder.AppendLine("</tr>");
-                        if (i < table.Columns.Count - 1)
+                        if (i < table.Columns.Count - 1 || primaryCols.Count > 0)
                         {
                             sqlBuilder.Append(",");
                         }
                         sqlBuilder.AppendLine();
+                    }
                         if (column.ForeignKeys != null)
                         {
                             foreach (ForeignKey foreignKey in column.ForeignKeys)
@@ -375,8 +401,21 @@ namespace SQL_Generator_WPF.Coverter
                                 refsBuilder.Append(" ").Append(DeleteConstraintAction).AppendLine(";");
                             }
                         }
-                    }
                 }
+                if (primaryCols.Count > 0)
+                {
+                    sqlBuilder.Append(Primary).Append("(");
+                    for (var i = 0; i < primaryCols.Count; i++)
+                    {
+                        Column primaryCol = primaryCols[i];
+
+                        sqlBuilder.Append(primaryCol.Name);
+                        if(i < primaryCols.Count -1)
+                            sqlBuilder.Append(", ");
+                    }
+                    sqlBuilder.AppendLine(")");
+                }
+
 
                 sqlBuilder.Append(") ").Append(ParamsTable).AppendLine(";");
                 sqlBuilder.AppendLine();
