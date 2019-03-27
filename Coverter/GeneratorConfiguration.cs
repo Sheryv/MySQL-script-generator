@@ -8,12 +8,25 @@ namespace SQL_Generator_WPF.Coverter
 {
     class GeneratorConfiguration
     {
-        public bool UpperCamelCase { get; set; }
+        public static readonly Dictionary<NamingTypes, string> NamingTypesNames = new Dictionary<NamingTypes, string>()
+        {
+            {NamingTypes.UpperCaseName, "UpperCamelCase"},
+            {NamingTypes.LowerCaseName, "lowerCamelCase"},
+            {NamingTypes.UnderscoreCase, "lower_case"},
+            {NamingTypes.Mixed, "Mixed: UpperCase[columns] / lower_case[tables]"}
+        };
+
+        public NamingTypes NamingConvention { get; set; }
         public bool AddLongNameForColumnId { get; set; }
         public bool AddIdWithPrimaryAuto { get; set; }
         public bool SetIntUnsigned { get; set; }
         public bool AddDrops { get; set; }
         public bool AddQuotas { get; set; }
+        public bool ReferencesInline { get; set; }
+        public bool PrimaryKeyInline { get; set; }
+        public bool NotNullByDefault { get; set; }
+        public string TablePrefix { get; set; }
+        public string ColumnPrefix { get; set; }
 
         public string TableColumnName;
         public string TypeColumnName;
@@ -32,8 +45,11 @@ namespace SQL_Generator_WPF.Coverter
             AddLongNameForColumnId = false;
             AddDrops = false;
             AddIdWithPrimaryAuto = true;
-            UpperCamelCase = true;
+            NamingConvention = NamingTypes.Mixed;
             SetIntUnsigned = false;
+            ReferencesInline = true;
+            PrimaryKeyInline = true;
+            NotNullByDefault = false;
         }
     }
 }

@@ -19,6 +19,7 @@ namespace SQL_Generator_WPF.Coverter
         public readonly string TypeLongText = "LONGTEXT";
         public readonly string TypeDateTime = "DATETIME";
         public readonly string TypeDate = "DATE";
+        public readonly string TypeFloat = "FLOAT";
         public readonly string TypeTimeStamp = "TIMESTAMP";
         public readonly string TypeBoolean = "BOOLEAN";
         public readonly string TypeBit = "BIT";
@@ -33,11 +34,14 @@ namespace SQL_Generator_WPF.Coverter
         public readonly AttributePattern AttributePrimary;
         public static BasicGenerator Instance;
         public List<Table> Tables { get; private set; }
+
         public List<DataTypePattern> DataTypePatterns { get; }
+
         //public List<AttributePattern> AttributePatterns { get; }
         //ALTER TABLE `platnosci`
         // ADD CONSTRAINT `fk_Platnosci_RodzajePlatnosci1` FOREIGN KEY(`idRodzajPlatnosci`) REFERENCES `rodzajeplatnosci` (`idRodzajePlatnosci`) ON DELETE NO ACTION ON UPDATE NO ACTION,
         public GeneratorConfiguration Config { get; }
+
         public bool WrapInDoubleQuotes { get; set; }
         public string NotNull => "NOT NULL";
         public string Unique => "UNIQUE";
@@ -93,23 +97,42 @@ namespace SQL_Generator_WPF.Coverter
             AttributePrimary = new AttributePattern(EnumAtrributes.PrimaryKey, Primary, "pk");
         }
 
-        protected string MakeColumnName(string rawColumn)
+        protected string MakeItemName(string rawName, bool isColumn = true)
         {
-            string[] parts = rawColumn.Trim().Split(' ');
+            string[] parts = rawName.Trim().Split(' ');
             string columnName = "";
             for (var i = 0; i < parts.Length; i++)
             {
                 string part = parts[i];
                 var letter = part[0].ToString();
-                if (Config.UpperCamelCase || i > 0)
+                if (Config.NamingConvention == NamingTypes.UpperCaseName ||
+                    (Config.NamingConvention == NamingTypes.Mixed && isColumn))
                 {
                     letter = letter.ToUpper();
+                }
+                else if (i > 0)
+                {
+                    if (Config.NamingConvention == NamingTypes.UnderscoreCase
+                        || (Config.NamingConvention == NamingTypes.Mixed && !isColumn))
+                    {
+                        letter = letter.ToLower();
+                    }
+                    else
+                    {
+                        letter = letter.ToUpper();
+                    }
                 }
                 else
                 {
                     letter = letter.ToLower();
                 }
                 columnName += letter + part.Substring(1);
+                if (i < parts.Length - 1
+                    && (Config.NamingConvention == NamingTypes.UnderscoreCase ||
+                        (Config.NamingConvention == NamingTypes.Mixed && !isColumn)))
+                {
+                    columnName += "_";
+                }
             }
             return columnName;
         }
@@ -170,14 +193,15 @@ namespace SQL_Generator_WPF.Coverter
                     return new DataType(dataTypePattern, size);
                 }
             }
-            throw new ArgumentException($"Column data type name not recognized! Do you need define it yorself? Problem occured near statement: {rawType}");
+            throw new ArgumentException(
+                $"Column data type name not recognized! Do you need define it yorself? Problem occured near statement: {rawType}");
         }
 
 
         public BasicGenerator Parse(string encodedString)
         {
-           
             Tables = new List<Table>();
+            encodedString = new Regex(@" +").Replace(encodedString, " ");
             string[] tables = encodedString.Split('+');
             foreach (string tbl in tables)
             {
@@ -195,12 +219,13 @@ namespace SQL_Generator_WPF.Coverter
                 {
                     addMultiPrimary = true;
                 }
-                Table table = new Table(tableName);
+                Table table = new Table(MakeItemName(tableName, false));
                 Column column = null;
                 if (!addMultiPrimary && Config.AddIdWithPrimaryAuto)
                 {
                     string col = "Id";
-                    if (!Config.UpperCamelCase)
+                    if (Config.NamingConvention != NamingTypes.Mixed
+                        && Config.NamingConvention != NamingTypes.UpperCaseName)
                     {
                         col = "id";
                     }
@@ -225,11 +250,12 @@ namespace SQL_Generator_WPF.Coverter
                     string[] attributes = line.Split(',');
 
                     //name
-                    string name = MakeColumnName(attributes[0]);
+                    string name = MakeItemName(attributes[0]);
                     column = new Column(name);
                     if (attributes.Length <= 1)
                     {
-                        throw new ApplicationException("Error: Type not specified for line: " + columnsIndex + " in table " + tableName);
+                        throw new ApplicationException("Error: Type not specified for line: " + columnsIndex +
+                                                       " in table " + tableName);
                     }
 
                     //type
@@ -271,10 +297,24 @@ namespace SQL_Generator_WPF.Coverter
                             else if (param.StartsWith(AttributeReference.SearchString))
                             {
                                 string refer = param.Substring(param.IndexOf(' '));
-                                string[] parts = refer.Split('.');
-                                string refTable = MakeColumnName(parts[0]);
-                                string refCol = MakeColumnName(parts[1]);
-                                ForeignKey key = new ForeignKey() {Key = column, RefTableString = refTable, RefColumnString = refCol};
+                                string refTable;
+                                string refCol = null;
+                                if (refer.Contains("."))
+                                {
+                                    string[] parts = refer.Split('.');
+                                    refTable = MakeItemName(parts[0], false);
+                                    refCol = MakeItemName(parts[1]);
+                                }
+                                else
+                                {
+                                    refTable = MakeItemName(refer, false);
+                                }
+                                ForeignKey key = new ForeignKey()
+                                {
+                                    Key = column,
+                                    RefTableString = refTable,
+                                    RefColumnString = refCol
+                                };
                                 column.AddForeignKey(key);
                             }
                         }
@@ -282,6 +322,42 @@ namespace SQL_Generator_WPF.Coverter
                     table.AddColumn(column);
                 }
                 Tables.Add(table);
+            }
+
+            foreach (var table in Tables)
+            {
+                foreach (var column in table.Columns)
+                {
+                    if (column.ForeignKeys != null)
+                    {
+                        foreach (ForeignKey foreignKey in column.ForeignKeys)
+                        {
+                            Table refTable = Tables.First(tbl => tbl.Name == foreignKey.RefTableString);
+                            Column refColumn = refTable.Columns[0];
+                            if (foreignKey.RefColumnString != null)
+                            {
+                                refColumn = refTable.Columns.First(
+                                    column1 => column1.Name == foreignKey.RefColumnString);
+                            }
+                            foreignKey.RefTable = refTable;
+                            foreignKey.RefColumn = refColumn;
+                        }
+                    }
+                }
+            }
+            foreach (var table in Tables)
+            {
+                foreach (var column in table.Columns)
+                {
+                    if (!string.IsNullOrEmpty(Config.ColumnPrefix))
+                    {
+                        column.Name = Config.ColumnPrefix + column.Name;
+                    }
+                }
+                if (!string.IsNullOrEmpty(Config.TablePrefix))
+                {
+                    table.Name = Config.TablePrefix + table.Name;
+                }
             }
             return this;
         }
@@ -343,7 +419,10 @@ namespace SQL_Generator_WPF.Coverter
                         {
                             sqlBuilder.Append(" ").Append(column.NotNullAttribute.PrintName);
                         }
-                        sqlBuilder.AppendLine(",");
+                        if (Config.PrimaryKeyInline)
+                        {
+                            sqlBuilder.Append(" ").Append(AttributePrimary.PrintName);
+                        }
                     }
                     else
                     {
@@ -366,7 +445,7 @@ namespace SQL_Generator_WPF.Coverter
                             sqlBuilder.Append(" ").Append(Unsigned);
                         }
                         var par = Config.NoAnswer;
-                        if (column.NotNullAttribute != null)
+                        if (column.ForeignKeys != null || (column.NotNullAttribute != null && Config.NotNullByDefault))
                         {
                             sqlBuilder.Append(" ").Append(column.NotNullAttribute.PrintName);
                             par = Config.YesAnswer;
@@ -382,27 +461,33 @@ namespace SQL_Generator_WPF.Coverter
                         htmlBuilder.AppendLine("    <td></td>");
                         htmlBuilder.AppendLine("    <td></td>");
                         htmlBuilder.AppendLine("</tr>");
-                        if (i < table.Columns.Count - 1 || primaryCols.Count > 0)
-                        {
-                            sqlBuilder.Append(",");
-                        }
-                        sqlBuilder.AppendLine();
                     }
-                        if (column.ForeignKeys != null)
+
+                    if (Config.ReferencesInline && column.ForeignKeys != null)
+                    {
+                        ForeignKey key = column.ForeignKeys[0];
+                        sqlBuilder.Append(" ").Append(AttributeReference.PrintName).Append(" ")
+                            .Append(key.RefTable.Name).Append("(").Append(key.RefColumn.Name).Append(")");
+                    }
+                    if (column.ForeignKeys != null && !Config.ReferencesInline)
+                    {
+                        foreach (ForeignKey foreignKey in column.ForeignKeys)
                         {
-                            foreach (ForeignKey foreignKey in column.ForeignKeys)
-                            {
-                                Table refTable = Tables.First(table1 => table1.Name == foreignKey.RefTableString);
-                                Column refColumn = refTable.Columns.First(column1 => column1.Name == foreignKey.RefColumnString);
-                                foreignKey.RefTable = refTable;
-                                foreignKey.RefColumn = refColumn;
-                                refsBuilder.Append(String.Format(AlterAddConstraint, table.Name, $"{table.Name}{column.Name}_{refTable.Name}{refColumn.Name}",
-                                    column.Name, refTable.Name, refColumn.Name));
-                                refsBuilder.Append(" ").Append(DeleteConstraintAction).AppendLine(";");
-                            }
+                            Table refTable = foreignKey.RefTable;
+                            Column refColumn = foreignKey.RefColumn;
+                            refsBuilder.Append(String.Format(AlterAddConstraint, table.Name,
+                                $"{table.Name}{column.Name}_{refTable.Name}{refColumn.Name}",
+                                column.Name, refTable.Name, refColumn.Name));
+                            refsBuilder.Append(" ").Append(DeleteConstraintAction).AppendLine(";");
                         }
+                    }
+                    if (i < table.Columns.Count - 1 || (!Config.PrimaryKeyInline && primaryCols.Count > 0))
+                    {
+                        sqlBuilder.Append(",");
+                    }
+                    sqlBuilder.AppendLine();
                 }
-                if (primaryCols.Count > 0)
+                if (!Config.PrimaryKeyInline && primaryCols.Count > 0)
                 {
                     sqlBuilder.Append(Primary).Append("(");
                     for (var i = 0; i < primaryCols.Count; i++)
@@ -410,7 +495,7 @@ namespace SQL_Generator_WPF.Coverter
                         Column primaryCol = primaryCols[i];
 
                         sqlBuilder.Append(primaryCol.Name);
-                        if(i < primaryCols.Count -1)
+                        if (i < primaryCols.Count - 1)
                             sqlBuilder.Append(", ");
                     }
                     sqlBuilder.AppendLine(")");

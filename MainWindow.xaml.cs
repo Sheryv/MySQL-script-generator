@@ -21,13 +21,11 @@ namespace SQL_Generator_WPF
 {
     public partial class MainWindow : Window
     {
+        private const string Version = "0.10";
 
-        private const string Version = "0.8";
         private const string TestTable =
-            "+Users \r\nLogin, v 40,u \r\nEmail,varchar(255),u \r\nPassword,v 64 \r\nRegistered, datetime, n \r\nLastLogin, decimal( 1 3) \r\nLastLoginInApp,datetime \r\nLastSynchronization, text \r\nSecurityLevel,tinyint 2 \r\nPermissions, int \r\nPhone Number,boolean \r\n\r\n\r\n+Roles\r\nName, v 128\r\nDesc, longtext,n\r\n\r\n+UsersRoles, noid\r\nUserId, int, ref Users.Id, pk\r\nRoleId, int, ref Roles.Id, pk\r\n\r\n";
-
-        private const string UpperCaseName = "UpperCamelCase";
-        private const string LowerCaseName = "lowerCamelCase";
+                "+Users \r\nLogin, v 40,u \r\nEmail,varchar(255),u \r\nPassword,v 64 \r\nRegistered, datetime, n \r\nLastLogin, decimal( 1 3) \r\nLastLoginInApp,datetime \r\nLastSynchronization, text \r\nSecurityLevel,tinyint 2 \r\nPermissions, int \r\nPhone Number,boolean \r\n\r\n\r\n+Roles, noid\r\nIdR, int, pk\r\nName, v 128\r\nDesc, longtext,n\r\n\r\n+Users Roles, noid\r\nUserId, int, ref Users, pk\r\nRoleId, int, ref Roles.IdR, pk\r\n\r\n"
+            ;
 
         private string fileDirectory;
 
@@ -35,10 +33,17 @@ namespace SQL_Generator_WPF
         public MainWindow()
         {
             InitializeComponent();
-            modeComboBox.Items.Add(UpperCaseName);
-            //modeComboBox.Items.Add(LowerCaseName);
-            modeComboBox.SelectedIndex = 0;
+            foreach (var value in GeneratorConfiguration.NamingTypesNames.Values)
+            {
+                modeComboBox.Items.Add(value);
+            }
+            modeComboBox.SelectedItem = GeneratorConfiguration.NamingTypesNames[NamingTypes.Mixed];
             versionTextBlock.Text = $"Version: {Version}";
+            longIdNamesChk.IsChecked = BasicGenerator.DummyConfiguration.AddLongNameForColumnId;
+            refernceInlineChk.IsChecked = BasicGenerator.DummyConfiguration.ReferencesInline;
+            primaryKeyInline.IsChecked = BasicGenerator.DummyConfiguration.PrimaryKeyInline;
+            notnullChk.IsChecked = BasicGenerator.DummyConfiguration.NotNullByDefault;
+            inputTextBox.Text = TestTable;
         }
 
 
@@ -48,19 +53,18 @@ namespace SQL_Generator_WPF
             {
                 OpenFileDialog openPicker = new OpenFileDialog();
                 openPicker.DefaultExt = ".txt";
-                openPicker.Filter = "Text files|*.txt";
-                Nullable<bool> result = openPicker.ShowDialog();
+                openPicker.Filter = "Text files|*.txt;*.md;*.rtf|All files|*.*";
+                bool? result = openPicker.ShowDialog();
                 if (result == true)
                 {
                     addressTxt.Text = openPicker.FileName.ToString();
                     fileDirectory = openPicker.FileName.ToString();
+                    inputTextBox.Text = File.ReadAllText(fileDirectory);
                 }
-                inputTextBox.Text = File.ReadAllText(fileDirectory);
             }
             catch (Exception exception)
             {
-                MessageBox.Show("Error", exception.Message);
-                throw;
+                MessageBox.Show(exception.Message, "Error while openning file!");
             }
         }
 
@@ -71,17 +75,18 @@ namespace SQL_Generator_WPF
             {
                 return;
             }
-          
+
+            try
+            {
                 BasicGenerator generator = new BasicGenerator(BasicGenerator.DummyConfiguration);
-                outPutTextBox.Text= generator.Parse(txt).Generate().ToSql();
+                outPutTextBox.Text = generator.Parse(txt).Generate().ToSql();
                 string h = generator.ToHtmlWithHeader();
                 WriteHtml(h);
                 tableOutTextBox.Text = h;
-             try
-            { }
+            }
             catch (Exception exception)
             {
-                MessageBox.Show(exception.Message, "Error while generating");
+                MessageBox.Show($"{exception.Message}\n\n{exception.StackTrace}", "Error while generating");
             }
             //outPutTextBox.Text = Generate(txt);
         }
@@ -107,6 +112,7 @@ namespace SQL_Generator_WPF
         private void exampleButton_Click(object sender, RoutedEventArgs e)
         {
             inputTextBox.Text = TestTable;
+            Crypto.Test();
         }
 
         private void button1_Click(object sender, RoutedEventArgs e)
@@ -119,14 +125,16 @@ namespace SQL_Generator_WPF
 
         private void modeComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            BasicGenerator.DummyConfiguration.UpperCamelCase = (string) modeComboBox.SelectedItem == UpperCaseName;
+            var type = GeneratorConfiguration.NamingTypesNames
+                .First(pair => Equals(pair.Value, modeComboBox.SelectedItem)).Key;
+            BasicGenerator.DummyConfiguration.NamingConvention = type;
         }
 
         private void Hyperlink_OnClick(object sender, RoutedEventArgs e)
         {
             try
             {
-                Hyperlink h = (Hyperlink)sender;
+                Hyperlink h = (Hyperlink) sender;
                 System.Diagnostics.Process.Start(h.NavigateUri.ToString());
             }
             catch (Exception exception)
@@ -138,18 +146,18 @@ namespace SQL_Generator_WPF
         private void AddDropsChk_Checked(object sender, RoutedEventArgs e)
         {
             CheckBox check = (CheckBox) sender;
-            BasicGenerator.DummyConfiguration.AddDrops =  (check.IsChecked != null && check.IsChecked != false);
+            BasicGenerator.DummyConfiguration.AddDrops = (check.IsChecked != null && check.IsChecked != false);
         }
 
         private void SetDefaultUnsigned_Checked(object sender, RoutedEventArgs e)
         {
-            CheckBox check = (CheckBox)sender;
+            CheckBox check = (CheckBox) sender;
             BasicGenerator.DummyConfiguration.SetIntUnsigned = (check.IsChecked != null && check.IsChecked != false);
         }
 
         private void QuotesChk_OnChecked(object sender, RoutedEventArgs e)
         {
-            CheckBox check = (CheckBox)sender;
+            CheckBox check = (CheckBox) sender;
             BasicGenerator.DummyConfiguration.AddQuotas = (check.IsChecked != null && check.IsChecked != false);
         }
 
@@ -161,10 +169,43 @@ namespace SQL_Generator_WPF
             }
             catch (Exception exception)
             {
-                
-                throw;
+                MessageBox.Show($"{exception.Message}\n\n{exception.StackTrace}", "Error while reading file");
             }
         }
 
+        private void LongIdNamesChk_OnChecked(object sender, RoutedEventArgs e)
+        {
+            CheckBox check = (CheckBox) sender;
+            BasicGenerator.DummyConfiguration.AddLongNameForColumnId =
+                (check.IsChecked != null && check.IsChecked != false);
+        }
+
+        private void RefernceInlineChk_OnChecked(object sender, RoutedEventArgs e)
+        {
+            CheckBox check = (CheckBox) sender;
+            BasicGenerator.DummyConfiguration.ReferencesInline = (check.IsChecked != null && check.IsChecked != false);
+        }
+
+        private void PrimaryKeyInline_OnChecked(object sender, RoutedEventArgs e)
+        {
+            CheckBox check = (CheckBox) sender;
+            BasicGenerator.DummyConfiguration.PrimaryKeyInline = (check.IsChecked != null && check.IsChecked != false);
+        }
+
+        private void NotnullChk_OnChecked(object sender, RoutedEventArgs e)
+        {
+            CheckBox check = (CheckBox) sender;
+            BasicGenerator.DummyConfiguration.NotNullByDefault = (check.IsChecked != null && check.IsChecked != false);
+        }
+
+        private void columnPrefix_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            BasicGenerator.DummyConfiguration.ColumnPrefix = ((TextBox) sender).Text;
+        }
+
+        private void tablePrefixTb_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            BasicGenerator.DummyConfiguration.TablePrefix = ((TextBox) sender).Text;
+        }
     }
 }

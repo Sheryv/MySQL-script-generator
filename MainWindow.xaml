@@ -6,39 +6,93 @@
         xmlns:local="clr-namespace:SQL_Generator_WPF"
         Icon="Res/icon.ico"
         mc:Ignorable="d"
-        Title="MySQL Script Generator" Height="384.8" Width="1017.267">
+        Title="MySQL Script Generator" Height="684.85" Width="1017.267">
     <Grid>
-        <Button x:Name="openBtn" Content="Open" HorizontalAlignment="Left" Margin="10,38,0,0" VerticalAlignment="Top" Width="75" Height="23" Click="OpenBtn_Click"/>
-        <TextBox x:Name="addressTxt" HorizontalAlignment="Left" Height="23" Margin="10,10,0,0" TextWrapping="Wrap" Text="D:\dane.txt" VerticalAlignment="Top" Width="273"/>
-        <TextBox x:Name="inputTextBox" Margin="10,85,0,25.2" TextWrapping="Wrap" AcceptsReturn="True" HorizontalAlignment="Left" Width="249" Text="+Users &#xD;&#xA;Login, v 40,u &#xD;&#xA;Email,varchar(255),u &#xD;&#xA;Password,v 64 &#xD;&#xA;Registered, datetime, n &#xD;&#xA;LastLogin, decimal( 1 3) &#xD;&#xA;LastLoginInApp,datetime &#xD;&#xA;LastSynchronization, text &#xD;&#xA;SecurityLevel,tinyint 2 &#xD;&#xA;Permissions, int &#xD;&#xA;Phone Number,boolean &#xD;&#xA;&#xD;&#xA;&#xD;&#xA;+Roles&#xD;&#xA;Name, v 128&#xD;&#xA;Desc, longtext,n&#xD;&#xA;&#xD;&#xA;+UsersRoles, noid&#xD;&#xA;UserId, int, ref Users.Id, pk&#xD;&#xA;RoleId, int, ref Roles.Id, pk&#xD;&#xA;&#xD;&#xA;"/>
-        <TextBox x:Name="outPutTextBox" Margin="264,85,0,25.2" TextWrapping="Wrap" AcceptsReturn="True" HorizontalAlignment="Left" Width="497" FontFamily="Consolas"/>
-        <Button x:Name="exampleBtn" Content="Example" HorizontalAlignment="Left" Margin="199,38,0,0" VerticalAlignment="Top" Width="84" Height="23" Click="exampleButton_Click"/>
-        <Button x:Name="button1" Content="Open in browser" HorizontalAlignment="Left" Margin="490,11,0,0" VerticalAlignment="Top" Width="113" Height="23" Click="button1_Click"/>
-        <ComboBox x:Name="modeComboBox" HorizontalAlignment="Left" Margin="359,11,0,0" VerticalAlignment="Top" Width="120" SelectionChanged="modeComboBox_SelectionChanged"/>
-        <Label x:Name="label" Content="Mode:" HorizontalAlignment="Left" Margin="299,10,0,0" VerticalAlignment="Top" Width="55" HorizontalContentAlignment="Right"/>
-        <TextBox x:Name="tableOutTextBox" Margin="766,85,10.2,25.2" TextWrapping="Wrap" AcceptsReturn="True" FontFamily="Consolas"/>
-        <Button x:Name="generateBtn" Content="Generate" Margin="0,36,10.2,0" VerticalAlignment="Top" Height="23" Click="generateBtn_Click" HorizontalAlignment="Right" Width="74"/>
-        <TextBox x:Name="textBox" HorizontalAlignment="Left" Height="22" Margin="359,38,0,0" TextWrapping="Wrap" Text="+Users &#xD;&#xA;&#xD;&#xA;Login, v 40,u &#xD;&#xA;&#xD;&#xA;Email,v 255,u &#xD;&#xA;&#xD;&#xA;Password,v 64 &#xD;&#xA;&#xD;&#xA;Registered, datetime &#xD;&#xA;&#xD;&#xA;LastLoginInWeb, datetime &#xD;&#xA;&#xD;&#xA;LastLoginInApp,datetime &#xD;&#xA;&#xD;&#xA;LastSynchronization, datetime &#xD;&#xA;&#xD;&#xA;SecurityLevel,tinyint 2 &#xD;&#xA;&#xD;&#xA;PasswordResetDate,datetime,n &#xD;&#xA;&#xD;&#xA;PasswordResetToken,v 64,n &#xD;&#xA;&#xD;&#xA;PasswordReset,tinyint 1 &#xD;&#xA;&#xD;&#xA;Permissions, int, ref Permissions.Id &#xD;&#xA;&#xD;&#xA;Phone Number,v 20 &#xD;&#xA;&#xD;&#xA;Activated, tinyint 1 &#xD;&#xA;&#xD;&#xA; &#xD;&#xA;&#xD;&#xA; &#xD;&#xA;&#xD;&#xA;+Permissions &#xD;&#xA;&#xD;&#xA;Sending,tinyint 1 &#xD;&#xA;&#xD;&#xA;Receiving,tinyint 1  &#xD;&#xA;&#xD;&#xA;ProfileEditing, tinyint 1  &#xD;&#xA;&#xD;&#xA;EditingOtherAccounts, tinyint 1  &#xD;&#xA;&#xD;&#xA;Displaying Other accounts, tinyint 1  &#xD;&#xA;&#xD;&#xA;Deleting other accounts, tinyint 1 &#xD;&#xA;&#xD;&#xA; &#xD;&#xA;&#xD;&#xA; &#xD;&#xA;&#xD;&#xA;+Messages &#xD;&#xA;&#xD;&#xA;Send date,datetime &#xD;&#xA;&#xD;&#xA;Receive date,datetime &#xD;&#xA;&#xD;&#xA;Received flag, boolean &#xD;&#xA;&#xD;&#xA;Conversation,int,ref Conversations.Id &#xD;&#xA;&#xD;&#xA;Content, text &#xD;&#xA;&#xD;&#xA;SecurityLevel, tinyint 2 &#xD;&#xA;&#xD;&#xA;Receiver PublicKey,int,ref PublicKeys.Id &#xD;&#xA;&#xD;&#xA;Sender PublicKey,int,ref PublicKeys.Id &#xD;&#xA;&#xD;&#xA;Visible, tinyint 1 &#xD;&#xA;&#xD;&#xA; &#xD;&#xA;&#xD;&#xA; &#xD;&#xA;&#xD;&#xA; &#xD;&#xA;&#xD;&#xA;+PublicKeys &#xD;&#xA;&#xD;&#xA;Owner,int,ref Users.Id &#xD;&#xA;&#xD;&#xA;CreateDate,datetime &#xD;&#xA;&#xD;&#xA;DisableDate,datetime &#xD;&#xA;&#xD;&#xA; &#xD;&#xA;&#xD;&#xA; &#xD;&#xA;&#xD;&#xA;+Conversations &#xD;&#xA;&#xD;&#xA;Sender,int,ref Users.Id &#xD;&#xA;&#xD;&#xA;Receiver,int,ref Users.Id &#xD;&#xA;&#xD;&#xA; &#xD;&#xA;&#xD;&#xA; &#xD;&#xA;&#xD;&#xA;+BlockedUsers &#xD;&#xA;&#xD;&#xA;User,int,ref Users.Id &#xD;&#xA;&#xD;&#xA;Blocked,int,ref Users.Id &#xD;&#xA;&#xD;&#xA;BlockDate,date &#xD;&#xA;&#xD;&#xA; &#xD;&#xA;&#xD;&#xA;+Contacts &#xD;&#xA;&#xD;&#xA;Owner,int,ref Users.Id &#xD;&#xA;&#xD;&#xA;ContactUser,int,ref Users.Id &#xD;&#xA;&#xD;&#xA;Accepted,tinyint 1 &#xD;&#xA;&#xD;&#xA;InviteDate,datetime &#xD;&#xA;&#xD;&#xA;Enabled, tinyint 1" VerticalAlignment="Top" Width="244"/>
+        <Grid Margin="7,111,7,20.2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="5" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="4*" />
+                <RowDefinition Height="5" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+            <DockPanel  Grid.Column="0" Grid.Row="0" >
+                <Label DockPanel.Dock="Top" Content="Input" Height="17" Padding="5,0"/>
+                <TextBox x:Name="inputTextBox" Margin="3" TextWrapping="Wrap" AcceptsReturn="True"/>
+            </DockPanel>
+            <GridSplitter Grid.Column="1" Grid.Row="0" Background="#FFF1F1F1" HorizontalAlignment="Stretch" Margin="0,20,0,0"  />
+            <DockPanel Grid.Column="2" Grid.Row="0">
+                <Label DockPanel.Dock="Top" Content="SQL Output"  Height="17" Padding="5,0"/>
+                <TextBox  x:Name="outPutTextBox" Margin="3" TextWrapping="Wrap" AcceptsReturn="True" FontFamily="Consolas" />
+            </DockPanel>
+            <GridSplitter Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="3" Background="#FFF1F1F1" HorizontalAlignment="Stretch" Margin="4,0"/>
+            <DockPanel Grid.Column="0" Grid.Row="2" Grid.ColumnSpan="3">
+                <Label DockPanel.Dock="Top" Content="HTML Output"  Height="17" Padding="5,0" HorizontalAlignment="Left"/>
+                <Button DockPanel.Dock="Right"  x:Name="button1" Content="Open in browser" Margin="5" Padding="3" VerticalAlignment="Top"
+                        Click="button1_Click" />
+                <TextBox  DockPanel.Dock="Bottom" x:Name="tableOutTextBox" Margin="3" TextWrapping="Wrap" AcceptsReturn="True"
+                      FontFamily="Consolas" />
+            </DockPanel>
+        </Grid>
+        <Button x:Name="openBtn" Content="..." HorizontalAlignment="Left" Margin="219,10,0,0" VerticalAlignment="Top"
+                Width="22" Height="23" Click="OpenBtn_Click" />
+        <TextBox x:Name="addressTxt" HorizontalAlignment="Left" Height="23" Margin="10,10,0,0" TextWrapping="Wrap"
+                 Text="D:\dane.txt" VerticalAlignment="Top" Width="204" />
+        <Button x:Name="exampleBtn" Content="Example" HorizontalAlignment="Left" Margin="10,83,0,0"
+                VerticalAlignment="Top" Width="84" Height="23" Click="exampleButton_Click" />
+
+        <ComboBox x:Name="modeComboBox" HorizontalAlignment="Left" Margin="51,39,0,0" VerticalAlignment="Top"
+                  Width="288" SelectionChanged="modeComboBox_SelectionChanged" />
+        <Label x:Name="label" Content="Mode:" HorizontalAlignment="Left" Margin="6,39,0,0" VerticalAlignment="Top"
+               Width="45" HorizontalContentAlignment="Right" Height="27" />
+        <Button x:Name="generateBtn" Content="Generate SQL" Margin="0,95,10.2,0" VerticalAlignment="Top" Padding="5"
+                Click="generateBtn_Click" HorizontalAlignment="Right" FontSize="14" FontWeight="Bold" />
 
         <DockPanel Margin="0,0,0.2,0.2" Height="20" VerticalAlignment="Bottom">
             <StatusBar DockPanel.Dock="Bottom" FontSize="10" Margin="0">
                 <StatusBarItem Margin="10,0">
-                    <TextBlock  Margin="0" VerticalAlignment="Top" >
-                    GitHub: <Hyperlink NavigateUri="https://github.com/Sheryv/MySQL-script-generator" Click="Hyperlink_OnClick">https://github.com/Sheryv/MySQL-script-generator</Hyperlink>
+                    <TextBlock Margin="0" VerticalAlignment="Top">
+                        GitHub:
+                        <Hyperlink NavigateUri="https://github.com/Sheryv/MySQL-script-generator"
+                                   Click="Hyperlink_OnClick">
+                            https://github.com/Sheryv/MySQL-script-generator
+                        </Hyperlink>
                     </TextBlock>
                 </StatusBarItem>
-                <StatusBarItem  HorizontalContentAlignment="Right" Margin="0,0,10,0">
+                <StatusBarItem HorizontalContentAlignment="Right" Margin="0,0,10,0">
                     <TextBlock x:Name="versionTextBlock" HorizontalAlignment="Right" Text="Version" />
                 </StatusBarItem>
             </StatusBar>
         </DockPanel>
-        <CheckBox x:Name="addDropsChk" Content="Add DROP statements" HorizontalAlignment="Left" Margin="618,10,0,0" VerticalAlignment="Top" Checked="AddDropsChk_Checked"/>
-        <CheckBox x:Name="setDefaultUnsigned"  Content="Set unsigned for integers if not specified" HorizontalAlignment="Left" Margin="618,26,0,0" VerticalAlignment="Top" Checked="SetDefaultUnsigned_Checked"/>
-        <CheckBox x:Name="quotesChk" Content="Add quote's" HorizontalAlignment="Left" Margin="618,42,0,0" VerticalAlignment="Top" Checked="QuotesChk_OnChecked"/>
-        <Label x:Name="label1" Content="Input" HorizontalAlignment="Left" Margin="10,61,0,0" VerticalAlignment="Top" RenderTransformOrigin="-1.177,-0.156" Height="30"/>
-        <Label x:Name="label2" Content="SQL Output" HorizontalAlignment="Left" Margin="264,61,0,0" VerticalAlignment="Top" RenderTransformOrigin="-1.177,-0.156" Height="30"/>
-        <Label x:Name="label3" Content="HTML Output" HorizontalAlignment="Left" Margin="766,61,0,0" VerticalAlignment="Top" RenderTransformOrigin="-1.177,-0.156" Height="30" Width="95"/>
-        <Button x:Name="readBtn" Content="Read" HorizontalAlignment="Left" Margin="105,38,0,0" VerticalAlignment="Top" Width="75" Height="23" Click="ReadBtn_OnClick"/>
+        <CheckBox x:Name="addDropsChk" Content="Add DROP statements" HorizontalAlignment="Left" Margin="355,13,0,0"
+                  VerticalAlignment="Top" Checked="AddDropsChk_Checked" Unchecked="AddDropsChk_Checked" />
+        <CheckBox x:Name="setDefaultUnsigned" Content="Set unsigned for integers if not specified"
+                  HorizontalAlignment="Left" Margin="355,29,0,0" VerticalAlignment="Top"
+                  Checked="SetDefaultUnsigned_Checked" Unchecked="SetDefaultUnsigned_Checked" />
+        <CheckBox x:Name="quotesChk" Content="Add quote's" HorizontalAlignment="Left" Margin="355,45,0,0"
+                  VerticalAlignment="Top" Checked="QuotesChk_OnChecked" Unchecked="QuotesChk_OnChecked" />
+
+        <Button x:Name="readBtn" Content="Read from path" HorizontalAlignment="Left" Margin="246,10,0,0" VerticalAlignment="Top"
+                Width="93" Height="23" Click="ReadBtn_OnClick" />
+        <CheckBox x:Name="longIdNamesChk" Content="Long names for ID" HorizontalAlignment="Left" Margin="355,61,0,0"
+                  VerticalAlignment="Top" Checked="LongIdNamesChk_OnChecked" Unchecked="LongIdNamesChk_OnChecked" />
+        <CheckBox x:Name="refernceInlineChk" Content="Put references inline" HorizontalAlignment="Left"
+                  Margin="355,76,0,0" VerticalAlignment="Top" Checked="RefernceInlineChk_OnChecked"
+                  Unchecked="RefernceInlineChk_OnChecked" />
+        <CheckBox x:Name="primaryKeyInline" Content="Put primary key inline" HorizontalAlignment="Left"
+                  Margin="355,91,0,0" VerticalAlignment="Top" Checked="PrimaryKeyInline_OnChecked"
+                  Unchecked="PrimaryKeyInline_OnChecked" />
+        <CheckBox x:Name="notnullChk" Content="Add NOT NULL by default" HorizontalAlignment="Left" Margin="594,14,0,0"
+                  VerticalAlignment="Top" Checked="NotnullChk_OnChecked" Unchecked="NotnullChk_OnChecked" />
+        <TextBox x:Name="tablePrefixTb" Height="23" Margin="846,24,9.2,0" TextWrapping="Wrap" VerticalAlignment="Top"
+                 TextChanged="tablePrefixTb_TextChanged" />
+        <Label Content="Table prefix" Margin="841,3,10.2,0" VerticalAlignment="Top" />
+        <TextBox x:Name="columnPrefixTb" Height="23" Margin="845,59,10.2,0" TextWrapping="Wrap" VerticalAlignment="Top"
+                 TextChanged="columnPrefix_TextChanged" />
+        <Label Content="Column prefix" Margin="841,39,10.2,0" VerticalAlignment="Top" />
 
     </Grid>
 </Window>
