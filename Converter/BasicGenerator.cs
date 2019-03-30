@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using SQL_Generator_WPF.Converter.Format;
 using SQL_Generator_WPF.Models;
 
-namespace SQL_Generator_WPF.Coverter
+namespace SQL_Generator_WPF.Converter
 {
     class BasicGenerator
     {
@@ -28,7 +28,7 @@ namespace SQL_Generator_WPF.Coverter
 
         public readonly char QuoteSign = '`';
 
-        public readonly AttributePattern AttributeNotNull;
+        public readonly AttributePattern AttributeNullFlag;
         public readonly AttributePattern AttributeUnique;
         public readonly AttributePattern AttributeReference;
         public readonly AttributePattern AttributePrimary;
@@ -91,7 +91,7 @@ namespace SQL_Generator_WPF.Coverter
             DataTypePattern.OnTypePatternsGeneration += OnTypePatternsGenerationEvent;
             DataTypePatterns = DataTypePattern.GetPatterns();
             //AttributePatterns = AttributePattern.GetAttributePatterns();
-            AttributeNotNull = new AttributePattern(EnumAtrributes.NotNull, NotNull, "n", true);
+            AttributeNullFlag = new AttributePattern(EnumAtrributes.NullFlag, NotNull, "n", true);
             AttributeUnique = new AttributePattern(EnumAtrributes.Unique, Unique, "u");
             AttributeReference = new AttributePattern(EnumAtrributes.References, References, "ref");
             AttributePrimary = new AttributePattern(EnumAtrributes.PrimaryKey, Primary, "pk");
@@ -99,42 +99,13 @@ namespace SQL_Generator_WPF.Coverter
 
         protected string MakeItemName(string rawName, bool isColumn = true)
         {
-            string[] parts = rawName.Trim().Split(' ');
-            string columnName = "";
-            for (var i = 0; i < parts.Length; i++)
+            Formatter formatter = Config.TableFormatter;
+            if (isColumn)
             {
-                string part = parts[i];
-                var letter = part[0].ToString();
-                if (Config.NamingConvention == NamingTypes.UpperCaseName ||
-                    (Config.NamingConvention == NamingTypes.Mixed && isColumn))
-                {
-                    letter = letter.ToUpper();
-                }
-                else if (i > 0)
-                {
-                    if (Config.NamingConvention == NamingTypes.UnderscoreCase
-                        || (Config.NamingConvention == NamingTypes.Mixed && !isColumn))
-                    {
-                        letter = letter.ToLower();
-                    }
-                    else
-                    {
-                        letter = letter.ToUpper();
-                    }
-                }
-                else
-                {
-                    letter = letter.ToLower();
-                }
-                columnName += letter + part.Substring(1);
-                if (i < parts.Length - 1
-                    && (Config.NamingConvention == NamingTypes.UnderscoreCase ||
-                        (Config.NamingConvention == NamingTypes.Mixed && !isColumn)))
-                {
-                    columnName += "_";
-                }
+                formatter = Config.ColumnFormatter;
             }
-            return columnName;
+
+            return formatter.FormatName(rawName, Config);
         }
 
         protected DataType GetDataType(string rawType)
@@ -202,7 +173,7 @@ namespace SQL_Generator_WPF.Coverter
         {
             Tables = new List<Table>();
             encodedString = new Regex(@" +").Replace(encodedString, " ");
-            string[] tables = encodedString.Split('+');
+            string[] tables = encodedString.Split('+', '#');
             foreach (string tbl in tables)
             {
                 bool addMultiPrimary = false;
@@ -223,17 +194,12 @@ namespace SQL_Generator_WPF.Coverter
                 Column column = null;
                 if (!addMultiPrimary && Config.AddIdWithPrimaryAuto)
                 {
-                    string col = "Id";
-                    if (Config.NamingConvention != NamingTypes.Mixed
-                        && Config.NamingConvention != NamingTypes.UpperCaseName)
-                    {
-                        col = "id";
-                    }
+                    string col = "id";
                     if (Config.AddLongNameForColumnId)
                     {
-                        col += GetNameWithFirstUpper(table.Name);
+                        col += col + " "+ MakeItemName(table.Name);
                     }
-                    column = new Column(col);
+                    column = new Column(MakeItemName(col));
                     column.SetPrimaryAutoIncrement();
                     //columnsIndex++;
                     table.AddColumn(column);
@@ -282,9 +248,9 @@ namespace SQL_Generator_WPF.Coverter
                         for (int i = 2; i < attributes.Length; i++)
                         {
                             string param = attributes[i].Trim();
-                            if (param.StartsWith(AttributeNotNull.SearchString))
+                            if (param.StartsWith(AttributeNullFlag.SearchString))
                             {
-                                column.NotNullAttribute = null;
+                                column.NullFlagAttribute = AttributeNullFlag;
                             }
                             else if (param.StartsWith(AttributeUnique.SearchString))
                             {
@@ -332,7 +298,13 @@ namespace SQL_Generator_WPF.Coverter
                     {
                         foreach (ForeignKey foreignKey in column.ForeignKeys)
                         {
-                            Table refTable = Tables.First(tbl => tbl.Name == foreignKey.RefTableString);
+                            Table refTable = Tables.FirstOrDefault(tbl => tbl.Name == foreignKey.RefTableString);
+                            if (refTable == null)
+                            {
+                                throw new ArgumentException(
+                                    $"Referenced table `{foreignKey.RefTableString}` not found. " +
+                                    $"Referenced at {table.Name}.{column.Name}");
+                            }
                             Column refColumn = refTable.Columns[0];
                             if (foreignKey.RefColumnString != null)
                             {
@@ -415,10 +387,10 @@ namespace SQL_Generator_WPF.Coverter
                         {
                             sqlBuilder.Append(" ").Append("AUTO_INCREMENT");
                         }
-                        if (column.NotNullAttribute != null)
-                        {
-                            sqlBuilder.Append(" ").Append(column.NotNullAttribute.PrintName);
-                        }
+//                        if (column.NullFlagAttribute != null)
+//                        {
+                        sqlBuilder.Append(" ").Append(AttributeNullFlag.PrintName);
+//                        }
                         if (Config.PrimaryKeyInline)
                         {
                             sqlBuilder.Append(" ").Append(AttributePrimary.PrintName);
@@ -445,13 +417,14 @@ namespace SQL_Generator_WPF.Coverter
                             sqlBuilder.Append(" ").Append(Unsigned);
                         }
                         var par = Config.NoAnswer;
-                        if (column.ForeignKeys != null || (column.NotNullAttribute != null && Config.NotNullByDefault))
-                        {
-                            sqlBuilder.Append(" ").Append(column.NotNullAttribute.PrintName);
-                            par = Config.YesAnswer;
-                        }
+
                         htmlBuilder.AppendLine($"    <td>{par}</td>");
                         par = Config.NoAnswer;
+                        if (NullAtributeApply(column, sqlBuilder))
+                        {
+                            par = Config.YesAnswer;
+                        }
+
                         if (column.UniqueAttribute != null)
                         {
                             sqlBuilder.Append(" ").Append(column.UniqueAttribute.PrintName);
@@ -599,6 +572,26 @@ namespace SQL_Generator_WPF.Coverter
         {
             list.Add(new DataTypePattern(EnumDataTypes.Varchar, "v", TypeVarchar, true));
             return list;
+        }
+
+        private bool NullAtributeApply(Column column, StringBuilder builder)
+        {
+            bool addNotNull = Config.NotNullByDefault;
+            if (column.NullFlagAttribute != null)
+            {
+                addNotNull = !addNotNull;
+            }
+
+            if (column.ForeignKeys != null)
+            {
+                addNotNull = column.NullFlagAttribute == null;
+            }
+            if (addNotNull)
+            {
+                builder.Append(" ").Append(AttributeNullFlag.PrintName);
+                return true;
+            }
+            return false;
         }
 
         protected string MakeTableHeader()

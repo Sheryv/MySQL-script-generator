@@ -21,12 +21,12 @@
             </Grid.RowDefinitions>
             <DockPanel  Grid.Column="0" Grid.Row="0" >
                 <Label DockPanel.Dock="Top" Content="Input" Height="17" Padding="5,0"/>
-                <TextBox x:Name="inputTextBox" Margin="3" TextWrapping="Wrap" AcceptsReturn="True"/>
+                <TextBox x:Name="inputTextBox" Margin="3" TextWrapping="Wrap" AcceptsReturn="True" VerticalScrollBarVisibility="Auto"/>
             </DockPanel>
             <GridSplitter Grid.Column="1" Grid.Row="0" Background="#FFF1F1F1" HorizontalAlignment="Stretch" Margin="0,20,0,0"  />
             <DockPanel Grid.Column="2" Grid.Row="0">
                 <Label DockPanel.Dock="Top" Content="SQL Output"  Height="17" Padding="5,0"/>
-                <TextBox  x:Name="outPutTextBox" Margin="3" TextWrapping="Wrap" AcceptsReturn="True" FontFamily="Consolas" />
+                <TextBox  x:Name="outPutTextBox" Margin="3" TextWrapping="Wrap" AcceptsReturn="True" FontFamily="Consolas" VerticalScrollBarVisibility="Auto"/>
             </DockPanel>
             <GridSplitter Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="3" Background="#FFF1F1F1" HorizontalAlignment="Stretch" Margin="4,0"/>
             <DockPanel Grid.Column="0" Grid.Row="2" Grid.ColumnSpan="3">
@@ -34,7 +34,7 @@
                 <Button DockPanel.Dock="Right"  x:Name="button1" Content="Open in browser" Margin="5" Padding="3" VerticalAlignment="Top"
                         Click="button1_Click" />
                 <TextBox  DockPanel.Dock="Bottom" x:Name="tableOutTextBox" Margin="3" TextWrapping="Wrap" AcceptsReturn="True"
-                      FontFamily="Consolas" />
+                      FontFamily="Consolas" VerticalScrollBarVisibility="Auto"/>
             </DockPanel>
         </Grid>
         <Button x:Name="openBtn" Content="..." HorizontalAlignment="Left" Margin="219,10,0,0" VerticalAlignment="Top"
@@ -44,10 +44,12 @@
         <Button x:Name="exampleBtn" Content="Example" HorizontalAlignment="Left" Margin="10,83,0,0"
                 VerticalAlignment="Top" Width="84" Height="23" Click="exampleButton_Click" />
 
-        <ComboBox x:Name="modeComboBox" HorizontalAlignment="Left" Margin="51,39,0,0" VerticalAlignment="Top"
-                  Width="288" SelectionChanged="modeComboBox_SelectionChanged" />
-        <Label x:Name="label" Content="Mode:" HorizontalAlignment="Left" Margin="6,39,0,0" VerticalAlignment="Top"
-               Width="45" HorizontalContentAlignment="Right" Height="27" />
+        <ComboBox x:Name="columnNamingCb" HorizontalAlignment="Left" Margin="176,54,0,0" VerticalAlignment="Top"
+                  Width="174" SelectionChanged="modeComboBox_SelectionChanged" />
+        <ComboBox x:Name="tableNamingCb" HorizontalAlignment="Left" Margin="10,54,0,0" VerticalAlignment="Top"
+                  Width="161" SelectionChanged="modeComboBox_SelectionChanged" />
+        <Label x:Name="label" Content="Table Naming:" HorizontalAlignment="Left" Margin="7,33,0,0" VerticalAlignment="Top"
+               Width="164" Height="27" />
         <Button x:Name="generateBtn" Content="Generate SQL" Margin="0,95,10.2,0" VerticalAlignment="Top" Padding="5"
                 Click="generateBtn_Click" HorizontalAlignment="Right" FontSize="14" FontWeight="Bold" />
 
@@ -93,6 +95,8 @@
         <TextBox x:Name="columnPrefixTb" Height="23" Margin="845,59,10.2,0" TextWrapping="Wrap" VerticalAlignment="Top"
                  TextChanged="columnPrefix_TextChanged" />
         <Label Content="Column prefix" Margin="841,39,10.2,0" VerticalAlignment="Top" />
+        <Label x:Name="label_Copy" Content="Column Naming:" HorizontalAlignment="Left" Margin="176,33,0,0" VerticalAlignment="Top"
+            Width="174" Height="27" />
 
     </Grid>
 </Window>

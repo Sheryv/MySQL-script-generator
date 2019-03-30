@@ -15,13 +15,13 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using Microsoft.Win32;
-using SQL_Generator_WPF.Coverter;
+using SQL_Generator_WPF.Converter;
 
 namespace SQL_Generator_WPF
 {
     public partial class MainWindow : Window
     {
-        private const string Version = "0.10";
+        private const string Version = "0.11";
 
         private const string TestTable =
                 "+Users \r\nLogin, v 40,u \r\nEmail,varchar(255),u \r\nPassword,v 64 \r\nRegistered, datetime, n \r\nLastLogin, decimal( 1 3) \r\nLastLoginInApp,datetime \r\nLastSynchronization, text \r\nSecurityLevel,tinyint 2 \r\nPermissions, int \r\nPhone Number,boolean \r\n\r\n\r\n+Roles, noid\r\nIdR, int, pk\r\nName, v 128\r\nDesc, longtext,n\r\n\r\n+Users Roles, noid\r\nUserId, int, ref Users, pk\r\nRoleId, int, ref Roles.IdR, pk\r\n\r\n"
@@ -33,11 +33,17 @@ namespace SQL_Generator_WPF
         public MainWindow()
         {
             InitializeComponent();
-            foreach (var value in GeneratorConfiguration.NamingTypesNames.Values)
+            foreach (var value in GeneratorConfiguration.NamingFormatters.Keys)
             {
-                modeComboBox.Items.Add(value);
+                columnNamingCb.Items.Add(value);
+                tableNamingCb.Items.Add(value);
             }
-            modeComboBox.SelectedItem = GeneratorConfiguration.NamingTypesNames[NamingTypes.Mixed];
+            columnNamingCb.SelectedItem =
+                GeneratorConfiguration.NamingFormatters.First(n =>
+                    n.Value == BasicGenerator.DummyConfiguration.ColumnFormatter).Key;
+            tableNamingCb.SelectedItem =
+                GeneratorConfiguration.NamingFormatters.First(n =>
+                    n.Value == BasicGenerator.DummyConfiguration.TableFormatter).Key;
             versionTextBlock.Text = $"Version: {Version}";
             longIdNamesChk.IsChecked = BasicGenerator.DummyConfiguration.AddLongNameForColumnId;
             refernceInlineChk.IsChecked = BasicGenerator.DummyConfiguration.ReferencesInline;
@@ -125,9 +131,16 @@ namespace SQL_Generator_WPF
 
         private void modeComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            var type = GeneratorConfiguration.NamingTypesNames
-                .First(pair => Equals(pair.Value, modeComboBox.SelectedItem)).Key;
-            BasicGenerator.DummyConfiguration.NamingConvention = type;
+            if (columnNamingCb.SelectedItem != null)
+            {
+                BasicGenerator.DummyConfiguration.ColumnFormatter =
+                    GeneratorConfiguration.NamingFormatters[(string) columnNamingCb.SelectedItem];
+            }
+            if (tableNamingCb.SelectedItem != null)
+            {
+                BasicGenerator.DummyConfiguration.TableFormatter =
+                    GeneratorConfiguration.NamingFormatters[(string) tableNamingCb.SelectedItem];
+            }
         }
 
         private void Hyperlink_OnClick(object sender, RoutedEventArgs e)

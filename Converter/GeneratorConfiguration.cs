@@ -1,13 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using SQL_Generator_WPF.Converter.Format;
 
-namespace SQL_Generator_WPF.Coverter
+namespace SQL_Generator_WPF.Converter
 {
-    class GeneratorConfiguration
+    public class GeneratorConfiguration
     {
+        private const string UpperCamelCaseName = "UpperCamelCase";
+        private const string LowerCamelCaseName = "lowerCamelCase";
+        private const string UnderscoreCaseName = "underscore_case";
+
         public static readonly Dictionary<NamingTypes, string> NamingTypesNames = new Dictionary<NamingTypes, string>()
         {
             {NamingTypes.UpperCaseName, "UpperCamelCase"},
@@ -16,7 +17,16 @@ namespace SQL_Generator_WPF.Coverter
             {NamingTypes.Mixed, "Mixed: UpperCase[columns] / lower_case[tables]"}
         };
 
-        public NamingTypes NamingConvention { get; set; }
+        public static readonly Dictionary<string, Formatter> NamingFormatters = new Dictionary<string, Formatter>()
+        {
+            {UpperCamelCaseName, new UpperCamelFormatter()},
+            {UnderscoreCaseName, new UnderscoreFormatter()},
+            {LowerCamelCaseName, new LowerCamelFormatter()},
+        };
+
+
+        public Formatter ColumnFormatter { get; set; }
+        public Formatter TableFormatter { get; set; }
         public bool AddLongNameForColumnId { get; set; }
         public bool AddIdWithPrimaryAuto { get; set; }
         public bool SetIntUnsigned { get; set; }
@@ -45,11 +55,12 @@ namespace SQL_Generator_WPF.Coverter
             AddLongNameForColumnId = false;
             AddDrops = false;
             AddIdWithPrimaryAuto = true;
-            NamingConvention = NamingTypes.Mixed;
             SetIntUnsigned = false;
             ReferencesInline = true;
             PrimaryKeyInline = true;
             NotNullByDefault = false;
+            ColumnFormatter = NamingFormatters[UpperCamelCaseName];
+            TableFormatter = NamingFormatters[UnderscoreCaseName];
         }
     }
 }

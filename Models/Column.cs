@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using SQL_Generator_WPF.Coverter;
+using SQL_Generator_WPF.Converter;
 
 namespace SQL_Generator_WPF.Models
 {
@@ -12,7 +12,7 @@ namespace SQL_Generator_WPF.Models
         public string Name { get; set; }
         public DataType Type { get; set; }
         //public int Size { get; set; }
-        public AttributePattern NotNullAttribute { get; set; }
+        public AttributePattern NullFlagAttribute { get; set; }
         public AttributePattern UniqueAttribute { get; set; }
         public bool IsPrimary { get; set; }
         public bool IsAutoIncrement { get; set; }
@@ -23,7 +23,7 @@ namespace SQL_Generator_WPF.Models
         public Column(string name)
         {
             Name = name;
-            NotNullAttribute = BasicGenerator.Instance.AttributeNotNull;
+            NullFlagAttribute = null;
             UniqueAttribute = null;
             IsPrimary = false;
             IsAutoIncrement = false;
@@ -42,7 +42,7 @@ namespace SQL_Generator_WPF.Models
         public void SetPrimaryAutoIncrement()
         {
             Type = new DataType(BasicGenerator.Instance.DataTypePatterns.First(pattern => pattern.Type == EnumDataTypes.Int), BasicGenerator.Instance.DefaultIntegerSize);
-            NotNullAttribute = BasicGenerator.Instance.AttributeNotNull;
+            NullFlagAttribute = BasicGenerator.Instance.AttributeNullFlag;
             UniqueAttribute = null;
             IsPrimary = true;
             IsAutoIncrement = true;
@@ -72,7 +72,7 @@ namespace SQL_Generator_WPF.Models
 //        {
 //            List<AttributePattern> list = new List<AttributePattern>();
 //            BasicGenerator gen = BasicGenerator.Instance;
-//            list.Add(new AttributePattern(EnumAtrributes.NotNull, gen.NotNull, "n", true));
+//            list.Add(new AttributePattern(EnumAtrributes.NullFlag, gen.NullFlag, "n", true));
 //            list.Add(new AttributePattern(EnumAtrributes.Unique, gen.Unique, "u"));
 //            list.Add(new AttributePattern(EnumAtrributes.References, gen.References, "ref"));
 //            return list;
@@ -86,7 +86,7 @@ namespace SQL_Generator_WPF.Models
 
     enum EnumAtrributes
     {
-        NotNull,
+        NullFlag,
         Unique,
         References,
         PrimaryKey

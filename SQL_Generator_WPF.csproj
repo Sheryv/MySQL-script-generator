@@ -98,9 +98,13 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Coverter\Crypto.cs" />
-    <Compile Include="Coverter\GeneratorConfiguration.cs" />
-    <Compile Include="Coverter\NamingTypes.cs" />
+    <Compile Include="Converter\Crypto.cs" />
+    <Compile Include="Converter\Format\Formatter.cs" />
+    <Compile Include="Converter\Format\UnderscoreFormatter.cs" />
+    <Compile Include="Converter\Format\LowerCamelFormatter.cs" />
+    <Compile Include="Converter\Format\UpperCamelFormatter.cs" />
+    <Compile Include="Converter\GeneratorConfiguration.cs" />
+    <Compile Include="Converter\NamingTypes.cs" />
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
@@ -111,7 +115,7 @@
     <Compile Include="Models\Constraint.cs" />
     <Compile Include="Models\DataType.cs" />
     <Compile Include="Models\ForeignKey.cs" />
-    <Compile Include="Coverter\BasicGenerator.cs" />
+    <Compile Include="Converter\BasicGenerator.cs" />
     <Compile Include="Models\Table.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>

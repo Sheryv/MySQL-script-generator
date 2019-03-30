@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using SQL_Generator_WPF.Coverter;
+using SQL_Generator_WPF.Converter;
 
 namespace SQL_Generator_WPF.Models
 {
@@ -66,8 +66,8 @@ namespace SQL_Generator_WPF.Models
         {
             List<DataTypePattern> list = new List<DataTypePattern>();
             BasicGenerator gen = BasicGenerator.Instance;
-            list.Add(new DataTypePattern(EnumDataTypes.ByteInt, gen.TypeByteInt, true));
-            list.Add(new DataTypePattern(EnumDataTypes.SmallInt, gen.TypeSmallInt, true));
+            list.Add(new DataTypePattern(EnumDataTypes.ByteInt, gen.TypeByteInt, false));
+            list.Add(new DataTypePattern(EnumDataTypes.SmallInt, gen.TypeSmallInt, false));
             list.Add(new DataTypePattern(EnumDataTypes.Boolean, gen.TypeBoolean, false));
             list.Add(new DataTypePattern(EnumDataTypes.Int, gen.TypeInt, false));
             list.Add(new DataTypePattern(EnumDataTypes.Varchar, gen.TypeVarchar, true));
