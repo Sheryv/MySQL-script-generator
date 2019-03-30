@@ -56,36 +56,69 @@ For now there are only Polish headers defined, to use other language constant st
 ## Full Example 
 From
 ``` 
-+Users 
++ users 
 Login, v 40,u 
-Email,v 255,n,u 
-password,v 64 
-registered, datetime 
-Last Login, datetime 
-last login in app,datetime 
-Last Synchronization, datetime 
-securityLevel,tinyint 2 
+Email,varchar(255),u 
+Password,v 64 
+Registered, datetime, n
+Last Login, decimal(1 3), n 
+Last Login In App, datetime, n 
+Security Level, tinyint 2 
 Permissions, int 
-Phone Number,v 20 
+Phone Number, char 7, n
+Verified, boolean
+strange naMe Example, text, n
+
+# RoleS, noid
+custom id, int, pk
+Name, v 128
+Desc, longtext,n
+owner user, int, n, ref users
+
++ users Roles, noid
+UserId, int, ref Users, pk
+RoleId, int, ref Roles.custom id, pk
 ```
 To
 ``` sql
 CREATE TABLE Users (
-    Id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    Id INT AUTO_INCREMENT NOT NULL,
     Login VARCHAR(40) NOT NULL UNIQUE,
-    Email VARCHAR(255) UNIQUE,
+    Email VARCHAR(255) NOT NULL UNIQUE,
     Password VARCHAR(64) NOT NULL,
-    Registered DATETIME NOT NULL,
-    LastLogin DATETIME NOT NULL,
-    LastLoginInApp DATETIME NOT NULL,
-    LastSynchronization DATETIME NOT NULL,
+    Registered DATETIME,
+    LastLogin DECIMAL(1,3),
+    LastLoginInApp DATETIME,
     SecurityLevel TINYINT(2) NOT NULL,
     Permissions INT NOT NULL,
-    PhoneNumber VARCHAR(20) NOT NULL
-);
+    PhoneNumber CHAR(7),
+    Verified BOOLEAN NOT NULL,
+    StrangeNameExample TEXT,
+PRIMARY KEY(Id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE Roles (
+    CustomId INT NOT NULL,
+    Name VARCHAR(128) NOT NULL,
+    Desc LONGTEXT,
+    OwnerUser INT,
+PRIMARY KEY(CustomId)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE UsersRoles (
+    Userid INT NOT NULL,
+    Roleid INT NOT NULL,
+PRIMARY KEY(Userid, Roleid)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+
+ALTER TABLE Roles ADD CONSTRAINT RolesOwnerUser_UsersId FOREIGN KEY(OwnerUser) REFERENCES Users (Id) ON DELETE NO ACTION ON UPDATE NO ACTION;
+ALTER TABLE UsersRoles ADD CONSTRAINT UsersRolesUserid_UsersId FOREIGN KEY(Userid) REFERENCES Users (Id) ON DELETE NO ACTION ON UPDATE NO ACTION;
+ALTER TABLE UsersRoles ADD CONSTRAINT UsersRolesRoleid_RolesCustomId FOREIGN KEY(Roleid) REFERENCES Roles (CustomId) ON DELETE NO ACTION ON UPDATE NO ACTION;
 ```
 And
 ```html
+<html lang="pl"><head><meta charset="UTF-8"><link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" /></head><body>
 <h2>Users</h2>
 <table class="table">
 <thead>
@@ -98,7 +131,7 @@ And
 <tr>
     <td>Login</td>
     <td>Znakowy (max. 40)</td>
-    <td>Tak</td>
+    <td>Nie</td>
     <td>Tak</td>
     <td></td>
     <td></td>
@@ -114,39 +147,31 @@ And
 <tr>
     <td>Password</td>
     <td>Znakowy (max. 64)</td>
-    <td>Tak</td>
     <td>Nie</td>
+    <td>Tak</td>
     <td></td>
     <td></td>
 </tr>
 <tr>
     <td>Registered</td>
-    <td>datetime_#</td>
-    <td>Tak</td>
+    <td>Data i czas</td>
+    <td>Nie</td>
     <td>Nie</td>
     <td></td>
     <td></td>
 </tr>
 <tr>
     <td>LastLogin</td>
-    <td>datetime_#</td>
-    <td>Tak</td>
+    <td>Dziesiętny (max. 1,3)</td>
+    <td>Nie</td>
     <td>Nie</td>
     <td></td>
     <td></td>
 </tr>
 <tr>
     <td>LastLoginInApp</td>
-    <td>datetime_#</td>
-    <td>Tak</td>
+    <td>Data i czas</td>
     <td>Nie</td>
-    <td></td>
-    <td></td>
-</tr>
-<tr>
-    <td>LastSynchronization</td>
-    <td>datetime_#</td>
-    <td>Tak</td>
     <td>Nie</td>
     <td></td>
     <td></td>
@@ -154,27 +179,96 @@ And
 <tr>
     <td>SecurityLevel</td>
     <td>Całkowity (max. 2)</td>
-    <td>Tak</td>
     <td>Nie</td>
+    <td>Tak</td>
     <td></td>
     <td></td>
 </tr>
 <tr>
     <td>Permissions</td>
     <td>Całkowity</td>
-    <td>Tak</td>
     <td>Nie</td>
+    <td>Tak</td>
     <td></td>
     <td></td>
 </tr>
 <tr>
     <td>PhoneNumber</td>
-    <td>Znakowy (max. 20)</td>
+    <td>Znakowy (max. 7)</td>
+    <td>Nie</td>
+    <td>Nie</td>
+    <td></td>
+    <td></td>
+</tr>
+<tr>
+    <td>Verified</td>
+    <td>Logiczny</td>
+    <td>Nie</td>
     <td>Tak</td>
+    <td></td>
+    <td></td>
+</tr>
+<tr>
+    <td>StrangeNameExample</td>
+    <td>Tekstowy</td>
+    <td>Nie</td>
     <td>Nie</td>
     <td></td>
     <td></td>
 </tr>
 </tbody>
 </table>
+
+<h2>Roles</h2>
+<table class="table">
+<thead>
+<tr>
+    <th>Nazwa pola</th><th>Typ pola</th><th>Czy pole jest wymagane</th><th>Czy wartość jest unikatowa</th><th>Pozostałe atrybuty</th><th>Opis</th></tr>
+</thead>
+<tbody>
+<tr>
+    <td>CustomId</td><td>Całkowity</td><td>Tak</td><td>Tak</td><td>Klucz podstawowy, automatyczna inkrementacja</td><td>Wewnętrzny identyfikator</td></tr>
+<tr>
+    <td>Name</td>
+    <td>Znakowy (max. 128)</td>
+    <td>Nie</td>
+    <td>Tak</td>
+    <td></td>
+    <td></td>
+</tr>
+<tr>
+    <td>Desc</td>
+    <td>LONGTEXT_#</td>
+    <td>Nie</td>
+    <td>Nie</td>
+    <td></td>
+    <td></td>
+</tr>
+<tr>
+    <td>OwnerUser</td>
+    <td>Całkowity</td>
+    <td>Nie</td>
+    <td>Nie</td>
+    <td></td>
+    <td></td>
+</tr>
+</tbody>
+</table>
+
+<h2>UsersRoles</h2>
+<table class="table">
+<thead>
+<tr>
+    <th>Nazwa pola</th><th>Typ pola</th><th>Czy pole jest wymagane</th><th>Czy wartość jest unikatowa</th><th>Pozostałe atrybuty</th><th>Opis</th></tr>
+</thead>
+<tbody>
+<tr>
+    <td>Userid</td><td>Całkowity</td><td>Tak</td><td>Tak</td><td>Klucz podstawowy, automatyczna inkrementacja</td><td>Wewnętrzny identyfikator</td></tr>
+<tr>
+    <td>Roleid</td><td>Całkowity</td><td>Tak</td><td>Tak</td><td>Klucz podstawowy, automatyczna inkrementacja</td><td>Wewnętrzny identyfikator</td></tr>
+</tbody>
+</table>
+
+
+</body></html>
 ```
