@@ -35,6 +35,7 @@ If you need to disable auto id fields add `,noid` after table name, ex.: `+Users
  * `<[u]>` -> this parameter is optional and stand for `UNIQUE`. If `u` is present `UNIQUE` will be inserted for that field
  * `<[ref Table name.field]>` -> adds `REFERENCES Table name(field)`
  * `<[pk]>` -> makes field primary key
+ 
 __Every field have to be defined in new line__
 
 __Id fields defined as primary key are added automatically to every table__.  
