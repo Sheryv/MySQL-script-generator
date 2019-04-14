@@ -8,7 +8,7 @@
         mc:Ignorable="d"
         Title="MySQL Script Generator" Height="684.85" Width="1017.267">
     <Grid>
-        <Grid Margin="7,111,7,20.2">
+        <Grid Margin="7,150,7,20.2">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="5" />
@@ -29,28 +29,27 @@
                 <TextBox  x:Name="outPutTextBox" Margin="3" TextWrapping="Wrap" AcceptsReturn="True" FontFamily="Consolas" VerticalScrollBarVisibility="Auto"/>
             </DockPanel>
             <GridSplitter Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="3" Background="#FFF1F1F1" HorizontalAlignment="Stretch" Margin="4,0"/>
-            <DockPanel Grid.Column="0" Grid.Row="2" Grid.ColumnSpan="3">
+            <DockPanel Grid.Column="0" Grid.Row="2" >
                 <Label DockPanel.Dock="Top" Content="HTML Output"  Height="17" Padding="5,0" HorizontalAlignment="Left"/>
                 <Button DockPanel.Dock="Right"  x:Name="button1" Content="Open in browser" Margin="5" Padding="3" VerticalAlignment="Top"
                         Click="button1_Click" />
                 <TextBox  DockPanel.Dock="Bottom" x:Name="tableOutTextBox" Margin="3" TextWrapping="Wrap" AcceptsReturn="True"
                       FontFamily="Consolas" VerticalScrollBarVisibility="Auto"/>
             </DockPanel>
+            <DockPanel Grid.Column="2" Grid.Row="2" >
+                <Label DockPanel.Dock="Top" Content="Markdown Output"  Height="17" Padding="5,0" HorizontalAlignment="Left"/>
+                <Button DockPanel.Dock="Right"  x:Name="button2" Content="" Margin="5" Padding="3" VerticalAlignment="Top"
+                        Click="button1_Click" />
+                <TextBox  DockPanel.Dock="Bottom" x:Name="markdownOutput" Margin="3" TextWrapping="Wrap" AcceptsReturn="True"
+                      FontFamily="Consolas" VerticalScrollBarVisibility="Auto"/>
+            </DockPanel>
         </Grid>
-        <Button x:Name="openBtn" Content="..." HorizontalAlignment="Left" Margin="219,10,0,0" VerticalAlignment="Top"
-                Width="22" Height="23" Click="OpenBtn_Click" />
-        <TextBox x:Name="addressTxt" HorizontalAlignment="Left" Height="23" Margin="10,10,0,0" TextWrapping="Wrap"
-                 Text="D:\dane.txt" VerticalAlignment="Top" Width="204" />
-        <Button x:Name="exampleBtn" Content="Example" HorizontalAlignment="Left" Margin="10,83,0,0"
-                VerticalAlignment="Top" Width="84" Height="23" Click="exampleButton_Click" />
-
-        <ComboBox x:Name="columnNamingCb" HorizontalAlignment="Left" Margin="176,54,0,0" VerticalAlignment="Top"
-                  Width="174" SelectionChanged="modeComboBox_SelectionChanged" />
-        <ComboBox x:Name="tableNamingCb" HorizontalAlignment="Left" Margin="10,54,0,0" VerticalAlignment="Top"
-                  Width="161" SelectionChanged="modeComboBox_SelectionChanged" />
-        <Label x:Name="label" Content="Table Naming:" HorizontalAlignment="Left" Margin="7,33,0,0" VerticalAlignment="Top"
-               Width="164" Height="27" />
-        <Button x:Name="generateBtn" Content="Generate SQL" Margin="0,95,10.2,0" VerticalAlignment="Top" Padding="5"
+        <Button x:Name="openBtn" Content="..." Margin="0,56,178.2,0" VerticalAlignment="Top" Height="23" Click="OpenBtn_Click" HorizontalAlignment="Right" Width="22" />
+        <TextBox x:Name="addressTxt" Height="41" Margin="0,10,7.2,0" TextWrapping="Wrap"
+                 Text="D:\dane.txt" VerticalAlignment="Top" HorizontalAlignment="Right" Width="193" />
+        <Button x:Name="exampleBtn" Content="Example" Margin="0,84,113.2,0"
+                VerticalAlignment="Top" Height="23" Click="exampleButton_Click" HorizontalAlignment="Right" Width="87" />
+        <Button x:Name="generateBtn" Content="Generate SQL" Margin="0,84,7.2,0" VerticalAlignment="Top" Padding="5"
                 Click="generateBtn_Click" HorizontalAlignment="Right" FontSize="14" FontWeight="Bold" />
 
         <DockPanel Margin="0,0,0.2,0.2" Height="20" VerticalAlignment="Bottom">
@@ -69,34 +68,69 @@
                 </StatusBarItem>
             </StatusBar>
         </DockPanel>
-        <CheckBox x:Name="addDropsChk" Content="Add DROP statements" HorizontalAlignment="Left" Margin="355,13,0,0"
+
+        <Button x:Name="readBtn" Content="Read from path" Margin="0,56,7.2,0" VerticalAlignment="Top" Height="23" Click="ReadBtn_OnClick" HorizontalAlignment="Right" Width="93" />
+        <TabControl Margin="10,0,205.2,0" Height="150" VerticalAlignment="Top">
+            <TabItem Header="Generate">
+                <Grid >
+                    <CheckBox x:Name="addDropsChk" Content="Add DROP statements" HorizontalAlignment="Left" Margin="2,0,0,0"
                   VerticalAlignment="Top" Checked="AddDropsChk_Checked" Unchecked="AddDropsChk_Checked" />
-        <CheckBox x:Name="setDefaultUnsigned" Content="Set unsigned for integers if not specified"
-                  HorizontalAlignment="Left" Margin="355,29,0,0" VerticalAlignment="Top"
+                    <CheckBox x:Name="setDefaultUnsigned" Content="Set unsigned for integers if not specified"
+                  HorizontalAlignment="Left" Margin="2,15,0,0" VerticalAlignment="Top"
                   Checked="SetDefaultUnsigned_Checked" Unchecked="SetDefaultUnsigned_Checked" />
-        <CheckBox x:Name="quotesChk" Content="Add quote's" HorizontalAlignment="Left" Margin="355,45,0,0"
+                    <CheckBox x:Name="quotesChk" Content="Add quote's" HorizontalAlignment="Left" Margin="2,30,0,0"
                   VerticalAlignment="Top" Checked="QuotesChk_OnChecked" Unchecked="QuotesChk_OnChecked" />
 
-        <Button x:Name="readBtn" Content="Read from path" HorizontalAlignment="Left" Margin="246,10,0,0" VerticalAlignment="Top"
-                Width="93" Height="23" Click="ReadBtn_OnClick" />
-        <CheckBox x:Name="longIdNamesChk" Content="Long names for ID" HorizontalAlignment="Left" Margin="355,61,0,0"
+                    <CheckBox x:Name="longIdNamesChk" Content="Long names for ID" HorizontalAlignment="Left" Margin="2,46,0,0"
                   VerticalAlignment="Top" Checked="LongIdNamesChk_OnChecked" Unchecked="LongIdNamesChk_OnChecked" />
-        <CheckBox x:Name="refernceInlineChk" Content="Put references inline" HorizontalAlignment="Left"
-                  Margin="355,76,0,0" VerticalAlignment="Top" Checked="RefernceInlineChk_OnChecked"
+                    <CheckBox x:Name="refernceInlineChk" Content="Put references inline" HorizontalAlignment="Left"
+                  Margin="2,61,0,0" VerticalAlignment="Top" Checked="RefernceInlineChk_OnChecked"
                   Unchecked="RefernceInlineChk_OnChecked" />
-        <CheckBox x:Name="primaryKeyInline" Content="Put primary key inline" HorizontalAlignment="Left"
-                  Margin="355,91,0,0" VerticalAlignment="Top" Checked="PrimaryKeyInline_OnChecked"
+                    <CheckBox x:Name="primaryKeyInline" Content="Put primary key inline" HorizontalAlignment="Left"
+                  Margin="2,76,0,0" VerticalAlignment="Top" Checked="PrimaryKeyInline_OnChecked"
                   Unchecked="PrimaryKeyInline_OnChecked" />
-        <CheckBox x:Name="notnullChk" Content="Add NOT NULL by default" HorizontalAlignment="Left" Margin="594,14,0,0"
+                    <CheckBox x:Name="notnullChk" Content="Add NOT NULL by default" HorizontalAlignment="Left" Margin="2,91,0,0"
                   VerticalAlignment="Top" Checked="NotnullChk_OnChecked" Unchecked="NotnullChk_OnChecked" />
-        <TextBox x:Name="tablePrefixTb" Height="23" Margin="846,24,9.2,0" TextWrapping="Wrap" VerticalAlignment="Top"
-                 TextChanged="tablePrefixTb_TextChanged" />
-        <Label Content="Table prefix" Margin="841,3,10.2,0" VerticalAlignment="Top" />
-        <TextBox x:Name="columnPrefixTb" Height="23" Margin="845,59,10.2,0" TextWrapping="Wrap" VerticalAlignment="Top"
-                 TextChanged="columnPrefix_TextChanged" />
-        <Label Content="Column prefix" Margin="841,39,10.2,0" VerticalAlignment="Top" />
-        <Label x:Name="label_Copy" Content="Column Naming:" HorizontalAlignment="Left" Margin="176,33,0,0" VerticalAlignment="Top"
+                    <ComboBox x:Name="tableNamingCb" HorizontalAlignment="Left" Margin="322,18,0,0" VerticalAlignment="Top"
+                  Width="161" SelectionChanged="modeComboBox_SelectionChanged" />
+                    <Label x:Name="label" Content="Table Naming:" HorizontalAlignment="Left" Margin="319,-4,0,0" VerticalAlignment="Top"
+               Width="164" Height="27" />
+                    <ComboBox x:Name="columnNamingCb" HorizontalAlignment="Left" Margin="322,59,0,0" VerticalAlignment="Top"
+                  Width="161" SelectionChanged="modeComboBox_SelectionChanged" />
+                    <Label x:Name="label_Copy" Content="Column Naming:" HorizontalAlignment="Left" Margin="319,38,0,0" VerticalAlignment="Top"
             Width="174" Height="27" />
+                    <TextBox x:Name="tablePrefixTb" Height="23" Margin="488,17,172.6,0" TextWrapping="Wrap" VerticalAlignment="Top"
+                 TextChanged="tablePrefixTb_TextChanged" />
+                    <Label Content="Table prefix" Margin="483,-3,179.6,0" VerticalAlignment="Top" RenderTransformOrigin="0.5,0.5" />
+                    <TextBox x:Name="columnPrefixTb" Height="23" Margin="488,59,171.6,0" TextWrapping="Wrap" VerticalAlignment="Top"
+                 TextChanged="columnPrefix_TextChanged" />
+                    <Label Content="Column prefix" Margin="483,38,150.6,0" VerticalAlignment="Top" />
+                    <Button x:Name="dbDeleteBtn" Content="Generate DROP SQL" Margin="0,6,39.6,0"
+            VerticalAlignment="Top" Height="23" Click="DbDeleteBtn_OnClick" HorizontalAlignment="Right" Width="125" />
+                    <Button x:Name="dbInsertBtn" Content="Generate INSERT SQL" Margin="0,34,39.6,0"
+                        VerticalAlignment="Top" Height="23" Click="DbInsertBtn_OnClick" HorizontalAlignment="Right" Width="125" />
+                    <Button x:Name="dbInsertFileBtn" Content="..." Margin="0,34,5.6,0"
+                        VerticalAlignment="Top" Height="23" Click="DbInsertFileBtn_OnClick" HorizontalAlignment="Right" Width="29" />
+                    <CheckBox x:Name="skipIdInstertingChk" Content="Skip ID inserting" Margin="0,59,57.6,0"
+                        VerticalAlignment="Top" Checked="SkipIdInstertingChk_OnChecked" Unchecked="SkipIdInstertingChk_OnUnchecked" HorizontalAlignment="Right" Width="107" />
+                </Grid>
+            </TabItem>
+            <TabItem Header="Database">
+                <Grid>
+                    <Button x:Name="dbExecuteBtn" Content="DB Execute SQL" Margin="9,40,0,0"
+            VerticalAlignment="Top" Height="23" Click="DbExecuteBtn_OnClick" HorizontalAlignment="Left" Width="132" />
+                    <Button x:Name="dbConnectionBtn" Content="DB Connection details" HorizontalAlignment="Left" Margin="10,12,0,0"
+            VerticalAlignment="Top" Width="131" Height="23" Click="DbConnectionBtn_OnClick" />
+                </Grid>
+            </TabItem>
+            <TabItem Header="Replacement">
+                <Grid>
+                    <TextBox x:Name="tbReplacement" AcceptsReturn="True" Margin="0,0,492.6,0.4" VerticalScrollBarVisibility="Auto" Text="test, replaced test"></TextBox>
+                    <Button Content="Get items list" Margin="0,10,9.6,0" VerticalAlignment="Top" Height="23" HorizontalAlignment="Right" Width="131" Click="ButtonBase_OnClick"/>
+            <TextBox x:Name="tbReplacementFormat" AcceptsReturn="True" Height="23" TextWrapping="Wrap" Width="120" Margin="0,10,145.6,89.4" HorizontalAlignment="Right" TextChanged="TbReplacementFormat_OnTextChanged"/>
+                </Grid>
+            </TabItem>
+        </TabControl>
 
     </Grid>
 </Window>

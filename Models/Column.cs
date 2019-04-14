@@ -10,6 +10,7 @@ namespace SQL_Generator_WPF.Models
     class Column
     {
         public string Name { get; set; }
+        public string RawName { get; set; }
         public DataType Type { get; set; }
         //public int Size { get; set; }
         public AttributePattern NullFlagAttribute { get; set; }
@@ -20,9 +21,10 @@ namespace SQL_Generator_WPF.Models
         public List<ForeignKey> ForeignKeys { get; private set; }
         public List<Constraint> Constraints { get; private set; }
 
-        public Column(string name)
+        public Column(string name, string rawName)
         {
             Name = name;
+            RawName = rawName;
             NullFlagAttribute = null;
             UniqueAttribute = null;
             IsPrimary = false;

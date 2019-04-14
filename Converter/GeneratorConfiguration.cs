@@ -37,6 +37,8 @@ namespace SQL_Generator_WPF.Converter
         public bool NotNullByDefault { get; set; }
         public string TablePrefix { get; set; }
         public string ColumnPrefix { get; set; }
+        public bool SkipIdInsterting { get; set; }
+        public string ReplacementFormat { get; set; }
 
         public string TableColumnName;
         public string TypeColumnName;
@@ -58,7 +60,9 @@ namespace SQL_Generator_WPF.Converter
             SetIntUnsigned = false;
             ReferencesInline = true;
             PrimaryKeyInline = true;
+            SkipIdInsterting = true;
             NotNullByDefault = false;
+            ReplacementFormat = "const {0}{1} = '{2}';\n";
             ColumnFormatter = NamingFormatters[UpperCamelCaseName];
             TableFormatter = NamingFormatters[UnderscoreCaseName];
         }

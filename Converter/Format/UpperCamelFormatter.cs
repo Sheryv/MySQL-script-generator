@@ -10,8 +10,8 @@ namespace SQL_Generator_WPF.Converter.Format
     {
         public override string FormatName(string name, GeneratorConfiguration configuration)
         {
-            return string.Join("", GetSeparatedWords(name, configuration)
-                .Select(word => word[0].ToString().ToUpper() + word.Substring(1).ToLower()));
+            return Clean(string.Join("", GetSeparatedWords(name, configuration)
+                .Select(word => word[0].ToString().ToUpper() + word.Substring(1).ToLower())));
         }
     }
 }

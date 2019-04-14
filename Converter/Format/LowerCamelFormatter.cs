@@ -26,7 +26,7 @@ namespace SQL_Generator_WPF.Converter.Format
                 }
                 result += letter + word.Substring(1).ToLower();
             }
-            return result;
+            return Clean(result);
         }
     }
 }

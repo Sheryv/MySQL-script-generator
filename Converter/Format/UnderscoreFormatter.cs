@@ -11,7 +11,7 @@ namespace SQL_Generator_WPF.Converter.Format
         public override string FormatName(string name, GeneratorConfiguration configuration)
         {
             var list = GetSeparatedWords(name, configuration).Select(s => s.ToLower());
-            return string.Join("_", list);
+            return Clean(string.Join("_", list));
         }
     }
 }

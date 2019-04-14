@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using Google.Protobuf.WellKnownTypes;
 using SQL_Generator_WPF.Converter.Format;
 using SQL_Generator_WPF.Models;
 
@@ -10,55 +11,59 @@ namespace SQL_Generator_WPF.Converter
 {
     class BasicGenerator
     {
-        public readonly string TypeInt = "INT";
-        public readonly string TypeSmallInt = "SMALLINT";
-        public readonly string TypeByteInt = "TINYINT";
-        public readonly string TypeVarchar = "VARCHAR";
-        public readonly string TypeChar = "CHAR";
-        public readonly string TypeText = "TEXT";
-        public readonly string TypeLongText = "LONGTEXT";
-        public readonly string TypeDateTime = "DATETIME";
-        public readonly string TypeDate = "DATE";
-        public readonly string TypeFloat = "FLOAT";
-        public readonly string TypeTimeStamp = "TIMESTAMP";
-        public readonly string TypeBoolean = "BOOLEAN";
-        public readonly string TypeBit = "BIT";
-        public readonly string TypeDecimal = "DECIMAL";
-        public readonly int DefaultIntegerSize = 11;
+        internal readonly string TypeInt = "INT";
+        internal readonly string TypeSmallInt = "SMALLINT";
+        internal readonly string TypeByteInt = "TINYINT";
+        internal readonly string TypeVarchar = "VARCHAR";
+        internal readonly string TypeChar = "CHAR";
+        internal readonly string TypeText = "TEXT";
+        internal readonly string TypeLongText = "LONGTEXT";
+        internal readonly string TypeDateTime = "DATETIME";
+        internal readonly string TypeDate = "DATE";
+        internal readonly string TypeFloat = "FLOAT";
+        internal readonly string TypeTimeStamp = "TIMESTAMP";
+        internal readonly string TypeBoolean = "BOOLEAN";
+        internal readonly string TypeBit = "BIT";
+        internal readonly string TypeDecimal = "DECIMAL";
+        internal readonly int DefaultIntegerSize = 11;
 
-        public readonly char QuoteSign = '`';
+        internal readonly char QuoteSign = '`';
 
-        public readonly AttributePattern AttributeNullFlag;
-        public readonly AttributePattern AttributeUnique;
-        public readonly AttributePattern AttributeReference;
-        public readonly AttributePattern AttributePrimary;
-        public static BasicGenerator Instance;
-        public List<Table> Tables { get; private set; }
+        internal readonly AttributePattern AttributeNullFlag;
+        internal readonly AttributePattern AttributeUnique;
+        internal readonly AttributePattern AttributeReference;
+        internal readonly AttributePattern AttributePrimary;
+        internal static BasicGenerator Instance;
+        public List<Table> Tables { get; private set; } = new List<Table>();
+        public Dictionary<string, string> Replacement { get; } = new Dictionary<string, string>();
 
-        public List<DataTypePattern> DataTypePatterns { get; }
+        internal List<DataTypePattern> DataTypePatterns { get; }
 
         //public List<AttributePattern> AttributePatterns { get; }
         //ALTER TABLE `platnosci`
         // ADD CONSTRAINT `fk_Platnosci_RodzajePlatnosci1` FOREIGN KEY(`idRodzajPlatnosci`) REFERENCES `rodzajeplatnosci` (`idRodzajePlatnosci`) ON DELETE NO ACTION ON UPDATE NO ACTION,
         public GeneratorConfiguration Config { get; }
 
-        public bool WrapInDoubleQuotes { get; set; }
-        public string NotNull => "NOT NULL";
-        public string Unique => "UNIQUE";
-        public string Unsigned => "UNSIGNED";
-        public string AutoIncrement => "AUTO_INCREMENT";
-        public string Primary => "PRIMARY KEY";
-        public string Create => "CREATE TABLE";
-        public string References => "REFERENCES";
-        public string Drop => "DROP TABLE IF EXIST";
+        private static readonly char[] tablesSeparators = {'+', '#'};
 
-        public string ParamsTable => "ENGINE=InnoDB DEFAULT CHARSET=utf8";
+        internal bool WrapInDoubleQuotes { get; set; }
+        internal string NotNull => "NOT NULL";
+        internal string Unique => "UNIQUE";
+        internal string Unsigned => "UNSIGNED";
+        internal string AutoIncrement => "AUTO_INCREMENT";
+        internal string Primary => "PRIMARY KEY";
+        internal string Create => "CREATE TABLE";
+        internal string References => "REFERENCES";
+        internal string Drop => "DROP TABLE IF EXISTS";
+
+        internal string ParamsTable => "ENGINE=InnoDB DEFAULT CHARSET=utf8";
 
 
-        public string AlterAddConstraint => "ALTER TABLE {0} ADD CONSTRAINT {1} FOREIGN KEY({2}) REFERENCES {3} ({4})";
+        internal string AlterAddConstraint =>
+            "ALTER TABLE {0} ADD CONSTRAINT {1} FOREIGN KEY({2}) REFERENCES {3} ({4})";
 
 
-        public string DeleteConstraintAction => "ON DELETE NO ACTION ON UPDATE NO ACTION";
+        internal string DeleteConstraintAction => "ON DELETE NO ACTION ON UPDATE NO ACTION";
 
         public static GeneratorConfiguration DummyConfiguration = new GeneratorConfiguration()
         {
@@ -74,7 +79,7 @@ namespace SQL_Generator_WPF.Converter
             YesAnswer = "Tak",
         };
 
-
+        private Random random;
         private StringBuilder sqlBuilder;
         private StringBuilder htmlBuilder;
 
@@ -95,6 +100,7 @@ namespace SQL_Generator_WPF.Converter
             AttributeUnique = new AttributePattern(EnumAtrributes.Unique, Unique, "u");
             AttributeReference = new AttributePattern(EnumAtrributes.References, References, "ref");
             AttributePrimary = new AttributePattern(EnumAtrributes.PrimaryKey, Primary, "pk");
+            random = new Random();
         }
 
         protected string MakeItemName(string rawName, bool isColumn = true)
@@ -104,8 +110,13 @@ namespace SQL_Generator_WPF.Converter
             {
                 formatter = Config.ColumnFormatter;
             }
-
-            return formatter.FormatName(rawName, Config);
+            var key = new LowerCamelFormatter().FormatName(rawName, DummyConfiguration);
+            var name = rawName;
+            if (Replacement.ContainsKey(key))
+            {
+                name = Replacement[key];
+            }
+            return formatter.FormatName(name, Config);
         }
 
         protected DataType GetDataType(string rawType)
@@ -168,12 +179,27 @@ namespace SQL_Generator_WPF.Converter
                 $"Column data type name not recognized! Do you need define it yorself? Problem occured near statement: {rawType}");
         }
 
-
-        public BasicGenerator Parse(string encodedString)
+        private void LoadReplacement(string text)
         {
+            var lines = new Regex(@"\r|#|\+|\t").Replace(text, "").Split('\n');
+            foreach (var line in lines)
+            {
+                var pair = line.Split(',');
+                if (pair.Length == 2 && pair[0].Length > 0 && pair[1].Length > 0)
+                {
+                    var name = new LowerCamelFormatter().FormatName(pair[0], DummyConfiguration);
+                    Replacement[name] = pair[1];
+                }
+            }
+        }
+
+
+        public BasicGenerator Parse(string encodedString, string replacement)
+        {
+            LoadReplacement(replacement);
             Tables = new List<Table>();
             encodedString = new Regex(@" +").Replace(encodedString, " ");
-            string[] tables = encodedString.Split('+', '#');
+            string[] tables = encodedString.Split(tablesSeparators);
             foreach (string tbl in tables)
             {
                 bool addMultiPrimary = false;
@@ -190,16 +216,16 @@ namespace SQL_Generator_WPF.Converter
                 {
                     addMultiPrimary = true;
                 }
-                Table table = new Table(MakeItemName(tableName, false));
+                Table table = new Table(MakeItemName(tableName, false), tableName);
                 Column column = null;
                 if (!addMultiPrimary && Config.AddIdWithPrimaryAuto)
                 {
                     string col = "id";
                     if (Config.AddLongNameForColumnId)
                     {
-                        col += col + " "+ MakeItemName(table.Name);
+                        col += col + " " + MakeItemName(table.Name);
                     }
-                    column = new Column(MakeItemName(col));
+                    column = new Column(MakeItemName(col), col);
                     column.SetPrimaryAutoIncrement();
                     //columnsIndex++;
                     table.AddColumn(column);
@@ -217,7 +243,7 @@ namespace SQL_Generator_WPF.Converter
 
                     //name
                     string name = MakeItemName(attributes[0]);
-                    column = new Column(name);
+                    column = new Column(name, attributes[0]);
                     if (attributes.Length <= 1)
                     {
                         throw new ApplicationException("Error: Type not specified for line: " + columnsIndex +
@@ -449,7 +475,7 @@ namespace SQL_Generator_WPF.Converter
                             Table refTable = foreignKey.RefTable;
                             Column refColumn = foreignKey.RefColumn;
                             refsBuilder.Append(String.Format(AlterAddConstraint, table.Name,
-                                $"{table.Name}{column.Name}_{refTable.Name}{refColumn.Name}",
+                                $"{table.Name}_{refTable.Name}_{(byte) random.Next():X}",
                                 column.Name, refTable.Name, refColumn.Name));
                             refsBuilder.Append(" ").Append(DeleteConstraintAction).AppendLine(";");
                         }
@@ -515,6 +541,162 @@ namespace SQL_Generator_WPF.Converter
                 throw new ArgumentException("Null SQL string builder! First call Parse() and Generate() method.");
             }
             return sqlBuilder.ToString();
+        }
+
+        public string GetDeleteTablesSql()
+        {
+            return string.Join("\n", Enumerable.Reverse(Tables).Select(table => $"{Drop} {table.Name};").ToList());
+        }
+
+        public string GetInsertDataSql(string csvData)
+        {
+            var tabledDatas = csvData.Replace("\r", "").Split(tablesSeparators);
+            var builder = new StringBuilder();
+            foreach (var tabledData in tabledDatas)
+            {
+                if (string.IsNullOrEmpty(tabledData))
+                {
+                    continue;
+                }
+                var lines = tabledData.Split('\n');
+                var tableName = lines[0].Trim(' ', ';').Trim();
+                var table = Tables.FirstOrDefault(t => t.Name == tableName);
+                if (table == null)
+                {
+                    Console.WriteLine($@"Table {tableName} skipped - not found");
+                    lines[0] = "";
+                    continue;
+                }
+                var skipId = Config.SkipIdInsterting && table.Columns.Count(c => c.IsPrimary) == 1;
+                builder.Append("-- ").Append(tableName).Append(" | ");
+                foreach (var column in table.Columns)
+                {
+                    if (skipId && column.IsPrimary)
+                    {
+                        continue;
+                    }
+                    builder.Append(column.Name).Append(", ");
+                }
+                builder.AppendLine();
+
+
+                for (var index = 1; index < lines.Length; index++)
+                {
+                    var line = lines[index];
+                    if (string.IsNullOrWhiteSpace(line))
+                    {
+                        continue;
+                    }
+                    builder.Append("INSERT INTO ").Append(table.Name).Append(" (");
+                    var valueStrings = line.Trim('\n').Split(';');
+                    var values = new List<string>();
+                    foreach (var value in valueStrings)
+                    {
+                        var valueTrim = value.Trim();
+                        valueTrim = valueTrim.Trim('"');
+                        values.Add(valueTrim);
+                    }
+                    int offset = 0;
+                    if (skipId)
+                    {
+                        offset = 1;
+                    }
+                    if (values.Count != table.Columns.Count - offset)
+                    {
+                        throw new ArgumentException(
+                            $@"Incorrect number of columns in file. Was {values.Count}, expected {
+                                    table.Columns.Count - offset
+                                }. For table '{table.Name}' at line {index + 1}");
+                    }
+                    string vs = "";
+                    for (int i = offset; i < table.Columns.Count; i++)
+                    {
+                        var column = table.Columns[i];
+                        builder.Append(column.Name);
+                        var value = values[i - offset];
+                        if (value.ToLower() == "null")
+                        {
+                            if (column.ForeignKeys != null ||
+                                (Config.NotNullByDefault ^ column.NullFlagAttribute != null))
+                            {
+                                throw new ArgumentException(
+                                    $@"Incorrect value. Null value not allowed for non null column. "
+                                    + $@"Occured for table '{table.Name}', column '{column.Name}' at line {index + 1}");
+                            }
+                            value = "NULL";
+                        }
+
+                        if (column.Type.Pattern.Type == EnumDataTypes.Text ||
+                            column.Type.Pattern.Type == EnumDataTypes.Varchar && value.ToLower() != "null")
+                        {
+                            vs += "'" + value + "'";
+                        }
+                        else
+                        {
+                            if (string.IsNullOrEmpty(value))
+                            {
+                                throw new ArgumentException(
+                                    $@"Incorrect value. Empty value is not supported for non-string columns. "
+                                    + $@"Occured for table '{table.Name}', column '{column.Name}' at line {index + 1}");
+                            }
+                            vs += value;
+                        }
+
+
+                        if (i < table.Columns.Count - 1)
+                        {
+                            vs += ", ";
+                            builder.Append(", ");
+                        }
+                    }
+                    builder.Append(") VALUES (");
+                    builder.Append(vs);
+//                    builder.Append(string.Join(", ", values));
+                    builder.AppendLine(");");
+                }
+                builder.AppendLine();
+            }
+            return builder.ToString();
+        }
+
+        public string GetItemsList()
+        {
+            var columnBuilder = new StringBuilder();
+            var tables = "";
+            foreach (var table in Tables)
+            {
+                string beforeReplace = new LowerCamelFormatter().FormatName(table.RawName, DummyConfiguration);
+                string constTableName = new UnderscoreFormatter().FormatName(table.RawName, DummyConfiguration);
+
+                tables += string.Format(Config.ReplacementFormat, "", constTableName.ToUpper(), beforeReplace);
+                foreach (var column in table.Columns)
+                {
+                    beforeReplace = new LowerCamelFormatter().FormatName(column.RawName, DummyConfiguration);
+                    string constName = new UnderscoreFormatter().FormatName(column.RawName, DummyConfiguration);
+
+                    columnBuilder.AppendFormat(Config.ReplacementFormat, constTableName.ToUpper() + "_",
+                        constName.ToUpper(),
+                        beforeReplace);
+                }
+            }
+            columnBuilder.AppendLine();
+            var items = new Dictionary<string, string>();
+            foreach (var table in Tables)
+            {
+                string beforeReplace = new LowerCamelFormatter().FormatName(table.RawName, DummyConfiguration);
+                items[beforeReplace] = table.Name;
+                foreach (var column in table.Columns)
+                {
+                    beforeReplace = new LowerCamelFormatter().FormatName(column.RawName, DummyConfiguration);
+                    items[beforeReplace] = column.Name;
+                }
+            }
+            foreach (var pair in items)
+            {
+                columnBuilder.AppendFormat("'{0}' => '{1}',", pair.Key, pair.Value).AppendLine();
+            }
+
+            return tables + "\n\n" + columnBuilder.ToString();
         }
 
         public string GetHtmlColumnType(Column col)
